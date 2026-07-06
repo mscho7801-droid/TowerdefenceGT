@@ -132,6 +132,7 @@ input{font-family:inherit;}
 .ic.shape-mage{border-radius:0;clip-path:polygon(50% 0%,0% 100%,100% 100%);}
 .ic.shape-flame{border-radius:50% 50% 50% 0;transform:rotate(45deg);}
 .ic.shape-bank{border-radius:3px;clip-path:polygon(50% 0%,100% 38%,100% 100%,0% 100%,0% 38%);}
+.ic.shape-awaken{clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);}
 .towerBtn .nm{font-size:10.5px;font-weight:700;color:var(--parch);}
 .towerBtn .cost{font-size:10.5px;font-weight:700;color:var(--gold);}
 .towerBtn.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(232,177,61,.35),0 0 14px rgba(232,177,61,.35);
@@ -151,14 +152,18 @@ input{font-family:inherit;}
 
 /* 오른쪽 UP 패널 */
 #upPanel{position:fixed;right:calc(env(safe-area-inset-right) + 6px);top:50%;transform:translateY(-50%);z-index:15;
-  display:flex;flex-direction:column;gap:6px;pointer-events:none;}
+  display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none;}
 #upPanel.hidden{display:none;}
-.upBtn{pointer-events:auto;width:52px;display:flex;flex-direction:column;align-items:center;gap:2px;
-  background:var(--panel);border:1.5px solid var(--panel-b);border-radius:11px;padding:6px 3px 5px;}
-.upBtn .ui{width:20px;height:20px;}
-.upBtn .ut{font-size:12px;font-weight:900;color:var(--gold);line-height:1;}
-.upBtn .uc{font-size:9px;font-weight:700;color:var(--parch);opacity:.75;}
-.upBtn.poor{opacity:.38;}
+.upToggle{pointer-events:auto;width:52px;height:48px;border-radius:12px;line-height:1.05;
+  background:var(--panel);border:1.5px solid var(--gold);color:var(--gold);font-size:13px;font-weight:900;}
+.upToggle.active{background:rgba(232,177,61,.22);box-shadow:0 0 12px rgba(232,177,61,.45);}
+.upList{display:none;flex-direction:column;gap:6px;align-items:flex-end;}
+.upList.open{display:flex;}
+.upBtn{pointer-events:auto;width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:var(--panel);border:1.5px solid var(--panel-b);border-radius:11px;padding:7px 3px 6px;}
+.upBtn .ui{width:22px;height:22px;}
+.upBtn .uc{font-size:10px;font-weight:800;color:var(--gold);opacity:.9;}
+.upBtn.poor{opacity:.4;}
 .upBtn.none{display:none;}
 
 /* 화염 스킬 버튼 */
@@ -170,16 +175,27 @@ input{font-family:inherit;}
 #skillBtn.cool{filter:grayscale(.7) brightness(.7);border-color:#777;}
 #skillBtn #skillCdTxt{position:absolute;font-size:15px;font-family:'Black Han Sans',sans-serif;}
 
-#infoPopup{position:absolute;z-index:16;transform:translate(-50%,-100%);background:var(--panel);
-  border:1px solid var(--panel-b);border-radius:12px;padding:12px;width:172px;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+#infoPopup{position:fixed;left:calc(env(safe-area-inset-left) + 8px);bottom:calc(env(safe-area-inset-bottom) + 96px);
+  z-index:16;background:var(--panel);border:1.5px solid var(--gold);border-radius:13px;padding:11px 12px;width:190px;
+  box-shadow:0 8px 26px rgba(0,0,0,.55);}
+#infoPopup.hidden{display:none;}
 #infoPopup .ttl{font-size:14px;font-weight:900;color:var(--gold);display:flex;justify-content:space-between;align-items:center;}
-#infoPopup .lv{font-size:11px;opacity:.7;margin:3px 0 8px;}
+#infoPopup .ttlLv{font-size:11px;color:var(--parch);opacity:.75;font-weight:700;margin-left:6px;margin-right:auto;}
+#infoPopup .stats{margin:7px 0 9px;display:flex;flex-direction:column;gap:3px;}
+#infoPopup .sr{display:flex;justify-content:space-between;font-size:11px;}
+#infoPopup .sr span{opacity:.62;}
+#infoPopup .sr b{color:var(--parch);font-weight:800;}
 #infoPopup .row{display:flex;gap:6px;}
 #infoPopup button{flex:1;padding:8px 2px;border-radius:8px;border:none;font-size:11.5px;font-weight:700;}
 #infoPopup .up{background:var(--gold);color:#2a1a05;}
 #infoPopup .up:disabled{opacity:.4;}
 #infoPopup .sl{background:rgba(224,87,74,.18);color:var(--crimson);border:1px solid var(--crimson-dim) !important;}
 #infoPopup .x{background:none;color:var(--parch);opacity:.6;font-size:15px;padding:0;flex:none;width:20px;}
+#infoPopup .skillMini{flex:none;width:34px;height:26px;margin-right:4px;border:1.5px solid #ff8c32;border-radius:8px;
+  background:radial-gradient(circle at 40% 35%,#ffb14a,#d2461a);color:#fff;font-size:14px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;gap:1px;position:relative;box-shadow:0 0 8px rgba(210,70,20,.5);}
+#infoPopup .skillMini span{font-size:10px;}
+#infoPopup .skillMini.cool{filter:grayscale(.6) brightness(.72);border-color:#888;box-shadow:none;}
 
 #gameOverScreen h2{font-size:30px;color:var(--crimson);}
 #gameOverScreen .waveReached{font-size:16px;margin:8px 0 20px;opacity:.85;}
@@ -307,7 +323,7 @@ const LANE_NOBUILD = 85;      // 이 거리 안쪽(길 주변)은 설치 불가
 const BUILD_MARGIN = 55;      // 맵 상/하단 여백
 const BASE_MARGIN = 90;       // 기지/스폰 포탈 주변 설치 금지 폭
 const MIN_TOWER_GAP = 62;     // 타워 간 최소 간격
-const MAX_TOWERS = 7;         // 필드 보유 가능한 최대 타워 수
+const MAX_TOWERS = 25;        // 필드 보유 가능한 최대 타워 수
 const MAX_LEVEL = 5;          // 전 유닛 최대 레벨
 const PREP_TIME = 8, FIRST_PREP = 6;
 const LOBBY_PREP_TIME = 300;  // 게임 시작 후 준비 페이즈 (5분)
@@ -323,15 +339,21 @@ const TOWER_TYPES = {
   flame:{name:'화염탑',cost:110,range:130,dmg:9,rate:0.35,proj:'fire',speed:420,color:'#f0803a',dark:'#8f4416',
     skillCd:30, skillDur:10, skillTick:0.1},   // 5렙 수동 스킬: 30초 쿨 / 10초간 0.1초마다 길 전체에 도트
   bank:{name:'은행탑',cost:120,range:0,dmg:0,rate:99,proj:'none',speed:1,color:'#e8c84a',dark:'#8f7a1c',
-    income:18}   // 웨이브마다 income*level 골드 지급
+    income:18},   // 웨이브마다 income*level 골드 지급
+  awaken:{name:'각성자',cost:200,range:175,dmg:26,rate:0.7,proj:'star',speed:640,color:'#ff5db0',dark:'#8f2f68',
+    infinite:true, decayWaves:5}   // 무한 업그레이드, 5웨이브 미업글 시 -1레벨
 };
-const TOWER_ORDER = ['archer','cannon','frost','mage','flame','bank'];
+const TOWER_ORDER = ['archer','cannon','frost','mage','flame','bank','awaken'];
 
 const ENEMY_TYPES = {
   normal:{hp:42,speed:56,gold:8,r:13,dmg:1,color:'#d95b4a'},
   fast:{hp:24,speed:104,gold:6,r:10,dmg:1,color:'#eab13a'},
   tank:{hp:170,speed:34,gold:22,r:19,dmg:2,color:'#5b6178'},
-  swarm:{hp:15,speed:74,gold:3,r:8,dmg:1,color:'#e8843a'}
+  swarm:{hp:15,speed:74,gold:3,r:8,dmg:1,color:'#e8843a'},
+  runner:{hp:30,speed:150,gold:9,r:9,dmg:1,color:'#57e0a8'},                 // 초고속
+  armored:{hp:90,speed:46,gold:16,r:15,dmg:1,color:'#8a93b8',armor:6},        // 피격당 -6 경감
+  healer:{hp:70,speed:50,gold:18,r:14,dmg:1,color:'#c77dff',heal:6,healR:120},// 주변 적 초당 회복
+  brute:{hp:520,speed:26,gold:60,r:26,dmg:4,color:'#3a2f47',armor:4}          // 보스급 거대체
 };
 
 // 설치 가능 여부: 길(LANE_NOBUILD) · 기지/스폰 주변(BASE_MARGIN) · 맵 밖 제외한 전 구역
@@ -356,6 +378,7 @@ const eventBanner = $('eventBanner'), eventTxt = $('eventTxt'), eventSub = $('ev
 const towerBarEl = $('towerBar'), popupEl = $('infoPopup');
 const prepBar = $('prepBar'), prepTimeTxt = $('prepTimeTxt'), readyBtn = $('readyBtn');
 const upPanel = $('upPanel'), skillBtn = $('skillBtn'), skillCdTxt = $('skillCdTxt');
+let bulkUpOpen = false;   // '일괄UP' 버튼으로 종류 선택 목록이 펼쳐졌는지
 const finalWaveTxt = $('finalWave'), retryBtn = $('retryBtn'), exitBtn = $('exitBtn');
 
 /* ---------------- 상태 ---------------- */
@@ -382,6 +405,7 @@ let activePopupTower = null;   // 현재 정보 팝업이 열려있는 타워 id
 let placePreview = null;       // {x,y,type} 설치 예정 위치 프리뷰 (더블탭 시 확정)
 let rangeShow = null;          // {x,y,range} 범위 표시 대상 (설치 위치/기존 타워)
 let gameSpeed = 1;             // 1x / 2x / 3x 배속
+let placeHintCount = 0;        // 배치 안내 토스트 노출 횟수 (처음 5회만)
 
 let camera = {x:0, y:0};
 let SCALE = 1;
@@ -681,6 +705,7 @@ function resetLobbyUI(){
   prepBar.classList.add('hidden');
   upPanel.classList.add('hidden');
   skillBtn.classList.add('hidden');
+  bulkUpOpen = false;
   menuActionBtn.disabled = false;
   menuActionBtn.textContent = mode==='host' ? '방 만들기' : '참가하기';
   currentScreen = 'lobby';
@@ -715,41 +740,74 @@ function genWaveList(n){
   for(let i=0;i<count;i++){
     let type='normal';
     const r = Math.random();
-    if(n>=6 && r<0.12) type='tank';
-    else if(n>=5 && r<0.30) type='swarm';
-    else if(n>=3 && r<0.55) type='fast';
+    // 웨이브가 오를수록 위협적인 유형 등장 확률 증가
+    if(n>=15 && r<0.08) type='armored';
+    else if(n>=12 && r<0.16) type='healer';
+    else if(n>=6 && r<0.24) type='tank';
+    else if(n>=8 && r<0.36) type='runner';
+    else if(n>=5 && r<0.50) type='swarm';
+    else if(n>=3 && r<0.70) type='fast';
     list.push(type);
   }
+  // 5웨이브마다 탱크 보강
   if(n%5===0){ const extra=Math.floor(n/5); for(let i=0;i<extra;i++) list.push('tank'); }
+  // 10웨이브마다 보스(brute) 등장 (넘어갈수록 여러 마리)
+  if(n%10===0){ const bosses=Math.floor(n/10); for(let i=0;i<bosses;i++) list.push('brute'); }
   return list;
+}
+// 10웨이브 계단식 배율: 10웨이브 넘길 때마다 체력이 크게 뛴다
+function waveTier(n){ return Math.floor((n-1)/10); }        // 0(1~10), 1(11~20), 2(21~30)...
+function hpScale(n){
+  const tier = waveTier(n);
+  const within = 1 + ((n-1)%10)*0.06;   // 같은 구간 내 완만 증가 (최대 +54%)
+  const step = Math.pow(2.4, tier);      // 구간마다 큰 계단 (2.4배씩)
+  return within * step;
+}
+function spdScale(n){
+  return 1 + Math.min((n-1)*0.008, 0.30) + waveTier(n)*0.06; // 구간마다 약간 더 빠르게
 }
 function startWave(){
   sim.wave++;
   sim.spawnQueue = genWaveList(sim.wave);
-  sim.spawnInterval = Math.max(0.95 - sim.wave*0.018, 0.32);
+  sim.spawnInterval = Math.max(0.95 - sim.wave*0.018, 0.28);
   sim.spawnTimer = 0;
   sim.waveActive = true;
-  pushEvent({t:'waveStart', wave:sim.wave, count:sim.spawnQueue.length});
+  const boss = sim.wave%10===0;
+  pushEvent({t:'waveStart', wave:sim.wave, count:sim.spawnQueue.length, boss});
 }
 function spawnEnemy(type){
   const def = ENEMY_TYPES[type];
-  const scale = 1 + (sim.wave-1)*0.125;
+  const scale = hpScale(sim.wave);
+  const hp = Math.round(def.hp*scale);
   sim.enemies.push({
     id: sim.nextEnemyId++, type,
     x: SPAWN_X,
-    hp: Math.round(def.hp*scale), maxHp: Math.round(def.hp*scale),
-    speed: def.speed*(1+Math.min((sim.wave-1)*0.01,0.35)),
-    dmg: def.dmg, slowT:0, slowFactor:1
+    hp, maxHp: hp,
+    speed: def.speed*spdScale(sim.wave),
+    dmg: def.dmg, armor: def.armor||0, heal: def.heal||0, healR: def.healR||0,
+    healAcc:0, slowT:0, slowFactor:1
   });
 }
 function towerStat(type, level, key){
-  const base = TOWER_TYPES[type][key];
+  const def = TOWER_TYPES[type];
+  const base = def[key];
   if(base===undefined) return 0;
+  if(def.infinite){
+    // 각성자: 레벨 오를수록 증가폭이 조금씩 줄지만(효율 체감) 절대치는 무한히 상승
+    if(key==='dmg') return base*(1 + 0.55*Math.log(level));   // 로그 성장
+    if(key==='range') return base*(1 + 0.06*Math.log(level)); // 사거리는 아주 완만
+    if(key==='rate') return base*Math.max(0.35, 1 - 0.10*Math.log(level)); // 연사도 점점 빨라지되 하한
+    return base;
+  }
   if(key==='dmg' || key==='range') return base*(1+(level-1)*0.32);
   if(key==='rate') return base*(1-(level-1)*0.12);
   return base;
 }
-function upgradeCost(type, level){ return Math.round(TOWER_TYPES[type].cost*(0.72+0.5*level)); }
+function upgradeCost(type, level){
+  const def = TOWER_TYPES[type];
+  if(def.infinite) return Math.round(def.cost*(0.6 + 0.42*level)); // 레벨 비례 무한 증가
+  return Math.round(def.cost*(0.72+0.5*level));
+}
 function sellRefund(tower){
   const inv = (tower.invested!=null) ? tower.invested : TOWER_TYPES[tower.type].cost;
   return Math.round(inv*0.6);
@@ -766,28 +824,31 @@ function applyInput(action, owner){
     if(sim.towers.some(t=>{ const dx=t.x-x, dy=t.y-y; return dx*dx+dy*dy < MIN_TOWER_GAP*MIN_TOWER_GAP; })) return {ok:false, reason:'gap'};
     if(sim.gold < def.cost) return {ok:false, reason:'gold'};
     sim.gold -= def.cost;
-    sim.towers.push({id:sim.nextTowerId++, x, y, type:action.towerType, level:1, cd:0, owner, invested:def.cost, skillCd:0});
+    sim.towers.push({id:sim.nextTowerId++, x, y, type:action.towerType, level:1, cd:0, owner, invested:def.cost, skillCd:0, lastUpWave:sim.wave});
     return {ok:true};
   }
   if(action.type==='upgrade'){
     const t = sim.towers.find(t=>t.id===action.towerId);
     if(!t) return {ok:false, reason:'none'};
-    if(t.level>=MAX_LEVEL) return {ok:false, reason:'level'};
+    const inf = TOWER_TYPES[t.type].infinite;
+    if(!inf && t.level>=MAX_LEVEL) return {ok:false, reason:'level'};   // 각성자는 상한 없음
     const cost = upgradeCost(t.type, t.level);
     if(sim.gold<cost) return {ok:false, reason:'gold'};
     sim.gold -= cost; t.level++; t.invested = (t.invested||TOWER_TYPES[t.type].cost)+cost;
+    t.lastUpWave = sim.wave;   // 강등 타이머 리셋
     return {ok:true};
   }
   if(action.type==='bulkUp'){
-    // 종류별 일괄 업그레이드: 최대레벨 미만인 해당 종류 타워를 전부 +1 (골드 되는 만큼)
+    // 종류별 일괄 업그레이드: (각성자는 무한, 나머지는 최대레벨 미만인) 해당 종류 타워를 전부 +1
     const kind = action.towerType;
-    const targets = sim.towers.filter(t=>t.type===kind && t.level<MAX_LEVEL);
+    const inf = TOWER_TYPES[kind].infinite;
+    const targets = sim.towers.filter(t=>t.type===kind && (inf || t.level<MAX_LEVEL));
     if(!targets.length) return {ok:false, reason:'level'};
     let upped=0;
     for(const t of targets){
       const cost = upgradeCost(t.type, t.level);
       if(sim.gold<cost) break;
-      sim.gold -= cost; t.level++; t.invested = (t.invested||TOWER_TYPES[t.type].cost)+cost; upped++;
+      sim.gold -= cost; t.level++; t.invested = (t.invested||TOWER_TYPES[t.type].cost)+cost; t.lastUpWave = sim.wave; upped++;
     }
     if(upped===0) return {ok:false, reason:'gold'};
     return {ok:true};
@@ -847,7 +908,8 @@ function fireTower(tower, target){
   if(soundReady && sfxBudget.fire < 4){ sfxBudget.fire++; Snd.play('fire', tower.type); }
 }
 function applyHit(proj, target){
-  target.hp -= proj.dmg;
+  const dmg = Math.max(1, proj.dmg - (target.armor||0));   // 장갑: 정면 피해 경감(최소 1)
+  target.hp -= dmg;
   if(proj.slow){
     target.slowFactor = Math.min(target.slowFactor, 1-proj.slow);
     target.slowT = Math.max(target.slowT, proj.slowDur);
@@ -855,7 +917,10 @@ function applyHit(proj, target){
   if(proj.splash>0){
     for(const e of sim.enemies){
       if(e.id===target.id) continue;
-      if(Math.abs(e.x-target.x) <= proj.splash) e.hp -= proj.dmg*0.55;
+      if(Math.abs(e.x-target.x) <= proj.splash){
+        const sd = Math.max(1, proj.dmg*0.55 - (e.armor||0));
+        e.hp -= sd;
+      }
     }
   }
 }
@@ -887,6 +952,19 @@ function hostTick(dt){
     if(e.slowT>0){ spd *= e.slowFactor; e.slowT -= dt; if(e.slowT<=0) e.slowFactor=1; }
     e.x -= spd*dt;
     if(e.x<=BASE_X){ sim.lives -= e.dmg; e.dead=true; sim.sfxBaseHit++; if(soundReady) Snd.play('baseHit'); }
+  }
+
+  // ---- 치유형 적: 주변 적을 초당 heal 만큼 회복 (최대체력 한도) ----
+  for(const h of sim.enemies){
+    if(!h.heal) continue;
+    h.healAcc += dt;
+    if(h.healAcc >= 0.5){   // 0.5초마다 heal/2씩
+      h.healAcc -= 0.5;
+      for(const e of sim.enemies){
+        if(e.id===h.id) continue;
+        if(Math.abs(e.x-h.x) <= h.healR){ e.hp = Math.min(e.maxHp, e.hp + h.heal*0.5); }
+      }
+    }
   }
 
   // ---- 불바다(화염탑 스킬): 길 전체, 0.1초마다 최대체력*5% - 5 피해 ----
@@ -942,6 +1020,16 @@ function hostTick(dt){
     // 은행탑 수입: income * level 합산
     for(const t of sim.towers){ if(t.type==='bank') bonus += TOWER_TYPES.bank.income * t.level; }
     sim.gold += bonus;
+    // 각성자 강등: 마지막 업그레이드 후 decayWaves 웨이브 경과 시 -1레벨 (최소 1)
+    let decayed = false;
+    for(const t of sim.towers){
+      const def = TOWER_TYPES[t.type];
+      if(!def.infinite) continue;
+      if(t.level>1 && (sim.wave - (t.lastUpWave||0)) >= def.decayWaves){
+        t.level--; t.lastUpWave = sim.wave; decayed = true;
+      }
+    }
+    if(decayed) pushEvent({t:'decay'});
     pushEvent({t:'waveClear', wave:sim.wave, bonus});
     sim.waveTimer = PREP_TIME;
   }
@@ -1048,10 +1136,11 @@ function typewrite(el, text){
 }
 function showBanner(evt){
   let title='', sub='';
-  if(evt.t==='waveStart'){ title='웨이브 '+evt.wave; sub=evt.count+'마리가 몰려온다'; if(soundReady) Snd.play('waveStart'); }
+  if(evt.t==='waveStart'){ title=(evt.boss?'⚠️ 보스 웨이브 ':'웨이브 ')+evt.wave; sub=evt.boss?'거대한 적이 몰려온다!':evt.count+'마리가 몰려온다'; if(soundReady) Snd.play('waveStart'); }
   else if(evt.t==='waveClear'){ title='웨이브 '+evt.wave+' 격퇴!'; sub='+'+evt.bonus+' 골드'; if(soundReady) Snd.play('waveClear'); }
   else if(evt.t==='battleStart'){ title='전투 시작!'; sub='첫 웨이브가 곧 몰려온다'; if(soundReady) Snd.play('waveStart'); }
   else if(evt.t==='skill'){ title='🔥 화염 폭풍'; sub='길 전체가 불바다에 휩싸인다'; if(soundReady) Snd.play('fire','cannon'); }
+  else if(evt.t==='decay'){ title='각성자 약화'; sub='업그레이드를 하지 않아 힘이 빠졌다'; if(soundReady) Snd.play('sell'); }
   else if(evt.t==='gameOver'){ title='기지 함락'; sub='웨이브 '+evt.wave+'에서 무너졌다'; if(soundReady){ Snd.stopBgm(); Snd.play('gameOver'); } }
   else return;
   typewrite(eventTxt, title);
@@ -1083,19 +1172,27 @@ function buildTowerBar(){
   buildUpPanel();
 }
 function buildUpPanel(){
-  let html='';
+  let html = '<button class="upToggle" id="upToggleBtn">일괄<br>UP</button>';
+  html += '<div class="upList" id="upList">';
   for(const key of TOWER_ORDER){
     const d = TOWER_TYPES[key];
     html += '<button class="upBtn" data-u="'+key+'">'+
       '<div class="ui shape-'+key+'" style="background:'+d.color+';"></div>'+
-      '<div class="ut">UP</div><div class="uc" data-uc="'+key+'"></div></button>';
+      '<div class="uc" data-uc="'+key+'"></div></button>';
   }
+  html += '</div>';
   upPanel.innerHTML = html;
+  $('upToggleBtn').onclick = ()=>{
+    bulkUpOpen = !bulkUpOpen;
+    refreshUpPanel();
+  };
   upPanel.querySelectorAll('.upBtn').forEach((btn)=>{
     btn.onclick = ()=>{
       const kind = btn.getAttribute('data-u');
       submitAction({type:'bulkUp', towerType:kind});
       if(soundReady) Snd.play('upgrade');
+      bulkUpOpen = false;   // 선택 후 목록 닫힘
+      refreshUpPanel();
     };
   });
 }
@@ -1107,11 +1204,17 @@ function refreshTowerBarSel(){
   });
 }
 function refreshUpPanel(){
-  // 종류별 보유/일괄업 비용 계산 → 없으면 숨김, 골드 부족이면 흐리게
+  const toggle = $('upToggleBtn'), list = $('upList');
+  if(!toggle || !list) return;
+  toggle.classList.toggle('active', bulkUpOpen);
+  list.classList.toggle('open', bulkUpOpen);
+  if(!bulkUpOpen) return;   // 닫혀 있으면 종류 버튼 갱신 불필요
+  // 종류별 보유/일괄업 비용 계산 → 보유 안 한 종류는 숨김, 골드 부족이면 흐리게
   const towers = getRenderTowers();
   upPanel.querySelectorAll('.upBtn').forEach((btn)=>{
     const kind = btn.getAttribute('data-u');
-    const targets = towers.filter(t=>t.type===kind && t.level<MAX_LEVEL);
+    const inf = TOWER_TYPES[kind].infinite;
+    const targets = towers.filter(t=>t.type===kind && (inf || t.level<MAX_LEVEL));
     const uc = btn.querySelector('[data-uc="'+kind+'"]');
     if(!towers.some(t=>t.type===kind)){ btn.classList.add('none'); return; }
     btn.classList.remove('none');
@@ -1124,35 +1227,79 @@ function refreshUpPanel(){
 function addGhost(id, x, y, type){ ghosts[id] = {x, y, type, t: performance.now()}; }
 function openInfoPopup(tower){
   activePopupTower = tower.id;
-  const [sx, sy] = worldToScreen(tower.x, tower.y);
+  renderInfoPopup();
+}
+function renderInfoPopup(){
+  if(activePopupTower==null){ popupEl.classList.add('hidden'); return; }
+  const tower = getRenderTowers().find(t=>t.id===activePopupTower);
+  if(!tower){ closeInfoPopup(); return; }   // 판매 등으로 사라졌으면 닫기
   const def = TOWER_TYPES[tower.type];
   const lvl = tower.level;
-  const upCost = lvl<MAX_LEVEL ? upgradeCost(tower.type, lvl) : null;
+  const inf = def.infinite;
+  const upCost = (inf || lvl<MAX_LEVEL) ? upgradeCost(tower.type, lvl) : null;   // 각성자는 항상 업글 가능
   const refund = sellRefund(tower);
-  let html = '<div class="ttl">'+def.name+'<button class="x" id="popX">✕</button></div>';
-  html += '<div class="lv">레벨 '+lvl+' / '+MAX_LEVEL;
-  if(tower.type==='flame' && lvl>=MAX_LEVEL) html += ' · 🔥스킬 사용가능';
-  else if(tower.type==='bank') html += ' · 웨이브당 +'+(TOWER_TYPES.bank.income*lvl)+'골드';
+
+  let html = '<div class="ttl">'+def.name+' <span class="ttlLv">'+(inf ? 'Lv.'+lvl : 'Lv.'+lvl+'/'+MAX_LEVEL)+'</span>';
+  // 화염탑 5렙: 제목줄 오른쪽에 작은 스킬 버튼
+  if(tower.type==='flame' && lvl>=MAX_LEVEL){
+    const cd = tower.skillCd||0;
+    html += '<button class="skillMini'+(cd>0?' cool':'')+'" id="popSkill">🔥'+(cd>0?'<span>'+Math.ceil(cd)+'</span>':'')+'</button>';
+  }
+  html += '<button class="x" id="popX">✕</button></div>';
+
+  // 종류별 실시간 스탯
+  html += '<div class="stats">';
+  if(tower.type==='bank'){
+    html += statRow('웨이브 수입', '+'+(def.income*lvl)+' 골드');
+  } else if(tower.type==='flame'){
+    html += statRow('공격력(도트)', Math.round(towerStat(tower.type,lvl,'dmg')));
+    html += statRow('사거리', Math.round(towerStat(tower.type,lvl,'range')));
+    html += statRow('연사(초)', towerStat(tower.type,lvl,'rate').toFixed(2));
+    if(lvl<MAX_LEVEL) html += statRow('스킬', 'Lv.5에서 해금');
+  } else {
+    html += statRow('공격력', Math.round(towerStat(tower.type,lvl,'dmg')));
+    html += statRow('사거리', Math.round(towerStat(tower.type,lvl,'range')));
+    html += statRow('연사(초)', towerStat(tower.type,lvl,'rate').toFixed(2));
+    if(def.splash) html += statRow('범위피해', '반경 '+def.splash);
+    if(def.slow) html += statRow('둔화', Math.round(def.slow*100)+'%');
+    if(def.infinite){
+      // 강등까지 남은 웨이브 (호스트에서만 lastUpWave 앎; 게스트는 안내만)
+      if(isHost && tower.lastUpWave!=null){
+        const left = def.decayWaves - (waveNum() - tower.lastUpWave);
+        html += statRow('강등까지', (lvl<=1 ? '—' : Math.max(0,left)+'웨이브'));
+      } else {
+        html += statRow('특성', '무한 강화');
+      }
+    }
+  }
+  html += statRow('설치자', tower.owner==='host'?'호스트':'게스트');
   html += '</div>';
+
   html += '<div class="row">';
   if(upCost!=null){
     html += '<button class="up" id="popUp"'+(gold()<upCost?' disabled':'')+'>업그레이드 ('+upCost+')</button>';
   } else {
     html += '<button class="up" disabled>최대 레벨</button>';
   }
-  html += '</div><div class="row" style="margin-top:6px;">';
   html += '<button class="sl" id="popSell">판매 (+'+refund+')</button>';
   html += '</div>';
+
   popupEl.innerHTML = html;
-  popupEl.style.left = sx+'px';
-  popupEl.style.top = Math.max(sy-30, 90)+'px';
   popupEl.classList.remove('hidden');
   $('popX').onclick = closeInfoPopup;
+  const skBtn = $('popSkill');
+  if(skBtn){
+    skBtn.onclick = ()=>{
+      if((tower.skillCd||0)>0){ toast('스킬 재사용 대기 중입니다'); return; }
+      submitAction({type:'skill', towerId:tower.id});
+    };
+  }
   if(upCost!=null){
-    $('popUp').onclick = ()=>{ submitAction({type:'upgrade', towerId:tower.id}); if(soundReady) Snd.play('upgrade'); closeInfoPopup(); };
+    $('popUp').onclick = ()=>{ submitAction({type:'upgrade', towerId:tower.id}); if(soundReady) Snd.play('upgrade'); };
   }
   $('popSell').onclick = ()=>{ submitAction({type:'sell', towerId:tower.id}); if(soundReady) Snd.play('sell'); closeInfoPopup(); };
 }
+function statRow(k,v){ return '<div class="sr"><span>'+k+'</span><b>'+v+'</b></div>'; }
 function closeInfoPopup(){
   activePopupTower=null; popupEl.classList.add('hidden');
   if(!placePreview) rangeShow=null;   // 배치 프리뷰 중이 아니면 범위표시 해제
@@ -1335,14 +1482,40 @@ function drawTowerShape(x,y,type,level,alpha){
     ctx.fillStyle='#8f7a1c'; ctx.font='900 15px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText('$', x, y+4); ctx.textAlign='left'; ctx.textBaseline='alphabetic';
   }
-  // 레벨 점 (최대 5개, 중앙 정렬)
-  const n = Math.min(level, MAX_LEVEL);
-  const startX = x - (n-1)*5;
-  for(let i=0;i<n;i++){
-    ctx.fillStyle=COL_GOLD;
-    ctx.beginPath(); ctx.arc(startX+i*10, y-30, 3.0, 0, Math.PI*2); ctx.fill();
+  else if(type==='awaken'){
+    // 빛나는 별
+    const glow = 0.4 + Math.sin(performance.now()/250)*0.25;
+    ctx.save();
+    ctx.shadowColor='rgba(255,93,176,'+glow.toFixed(2)+')'; ctx.shadowBlur=14;
+    drawStar(x, y, 5, 19, 8);
+    ctx.restore();
+    ctx.fillStyle='#ffd0ec';
+    drawStar(x, y, 5, 9, 4);
+  }
+  // 레벨 표시: 무한 타워는 숫자, 그 외는 점(최대 5)
+  if(TOWER_TYPES[type].infinite){
+    ctx.fillStyle=COL_GOLD; ctx.font='900 13px "Black Han Sans",sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('★'+level, x, y-32);
+    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  } else {
+    const n = Math.min(level, MAX_LEVEL);
+    const startX = x - (n-1)*5;
+    for(let i=0;i<n;i++){
+      ctx.fillStyle=COL_GOLD;
+      ctx.beginPath(); ctx.arc(startX+i*10, y-30, 3.0, 0, Math.PI*2); ctx.fill();
+    }
   }
   ctx.globalAlpha = 1;
+}
+function drawStar(cx, cy, spikes, outer, inner){
+  let rot = -Math.PI/2, step = Math.PI/spikes;
+  ctx.beginPath(); ctx.moveTo(cx+Math.cos(rot)*outer, cy+Math.sin(rot)*outer);
+  for(let i=0;i<spikes;i++){
+    rot+=step; ctx.lineTo(cx+Math.cos(rot)*inner, cy+Math.sin(rot)*inner);
+    rot+=step; ctx.lineTo(cx+Math.cos(rot)*outer, cy+Math.sin(rot)*outer);
+  }
+  ctx.closePath(); ctx.fill();
 }
 function drawBuildZones(){
   // 타워 선택 시에만 설치 가능 구역을 은은하게 강조 (길과 기지/스폰 주변 제외)
@@ -1390,27 +1563,47 @@ function drawTowers(){
   }
 }
 function drawEnemies(){
+  const now = performance.now()/1000;
   for(const e of getRenderEnemies()){
     const def = ENEMY_TYPES[e.type];
+    const r = def.r;
+    // 치유형: 주변 회복 오라
+    if(def.heal){
+      ctx.fillStyle='rgba(199,125,255,'+(0.10+Math.sin(now*3)*0.05).toFixed(3)+')';
+      ctx.beginPath(); ctx.arc(e.x, LANE_Y, def.healR||100, 0, Math.PI*2); ctx.fill();
+    }
     // 검은 안개 잔영
     ctx.fillStyle='rgba(20,15,28,.32)';
-    ctx.beginPath(); ctx.arc(e.x+def.r*0.7, LANE_Y, def.r*1.15, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(e.x+r*0.7, LANE_Y, r*1.15, 0, Math.PI*2); ctx.fill();
     // 몸체
     ctx.fillStyle = def.color;
-    ctx.beginPath(); ctx.arc(e.x, LANE_Y, def.r, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(e.x, LANE_Y, r, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle='rgba(0,0,0,.18)';
-    ctx.beginPath(); ctx.arc(e.x, LANE_Y+def.r*0.35, def.r*0.7, 0, Math.PI*2); ctx.fill();
-    // 체력바
-    const w=28;
-    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(e.x-w/2, LANE_Y-def.r-11, w, 5);
+    ctx.beginPath(); ctx.arc(e.x, LANE_Y+r*0.35, r*0.7, 0, Math.PI*2); ctx.fill();
+    // 장갑형: 금속 테두리
+    if(def.armor){
+      ctx.strokeStyle='#cbd2e6'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(e.x, LANE_Y, r-1, 0, Math.PI*2); ctx.stroke();
+    }
+    // 보스(brute): 왕관 표식
+    if(e.type==='brute'){
+      ctx.fillStyle=COL_GOLD;
+      ctx.beginPath();
+      ctx.moveTo(e.x-10, LANE_Y-r-4); ctx.lineTo(e.x-10, LANE_Y-r-14); ctx.lineTo(e.x-4, LANE_Y-r-8);
+      ctx.lineTo(e.x, LANE_Y-r-16); ctx.lineTo(e.x+4, LANE_Y-r-8); ctx.lineTo(e.x+10, LANE_Y-r-14);
+      ctx.lineTo(e.x+10, LANE_Y-r-4); ctx.closePath(); ctx.fill();
+    }
+    // 체력바 (보스는 더 넓게)
+    const w = e.type==='brute' ? 48 : 28;
+    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(e.x-w/2, LANE_Y-r-11, w, 5);
     ctx.fillStyle=COL_CRIMSON;
     const pct = e.maxHp>0 ? Math.max(0,Math.min(1, e.hp/e.maxHp)) : 0;
-    ctx.fillRect(e.x-w/2, LANE_Y-def.r-11, w*pct, 5);
+    ctx.fillRect(e.x-w/2, LANE_Y-r-11, w*pct, 5);
   }
 }
 function drawProjectiles(){
   for(const p of getRenderProjectiles()){
-    ctx.fillStyle = p.type==='shard' ? COL_TEAL : p.type==='bolt' ? '#c98bee' : p.type==='ball' ? '#caa27a' : '#dfe6c9';
+    ctx.fillStyle = p.type==='shard' ? COL_TEAL : p.type==='bolt' ? '#c98bee' : p.type==='ball' ? '#caa27a' : p.type==='star' ? '#ff5db0' : p.type==='fire' ? '#ff9040' : '#dfe6c9';
     ctx.beginPath(); ctx.arc(p.x, p.y, p.type==='ball'?6:4, 0, Math.PI*2); ctx.fill();
   }
 }
@@ -1474,7 +1667,7 @@ function handleTap(cx,cy,isDouble){
   // 5) 단일 탭 → 설치 예정 위치 + 범위 미리보기 (아직 설치 안 함)
   placePreview = {x:Math.round(wx), y:Math.round(wy), type:selectedTowerType};
   rangeShow = {x:Math.round(wx), y:Math.round(wy), range:rng};
-  toast('한 번 더 더블탭하면 설치됩니다');
+  if(placeHintCount < 5){ toast('한 번 더 더블탭하면 설치됩니다'); placeHintCount++; }
 }
 
 /* ---------------- 화면 전환 ---------------- */
@@ -1621,6 +1814,13 @@ function updateHud(){
   // 화염탑 5렙 스킬 버튼
   updateSkillBtn();
 
+  // 유닛 상태창(좌측 하단): 열려 있으면 실시간 갱신 + 해당 유닛 범위표시 유지
+  if(activePopupTower!=null){
+    const t = getRenderTowers().find(x=>x.id===activePopupTower);
+    if(t){ rangeShow = {x:t.x, y:t.y, range:towerStat(t.type,t.level,'range')}; }
+    renderInfoPopup();
+  }
+
   refreshTowerBarSel();
 }
 function myFlameTowers(){
@@ -1628,19 +1828,8 @@ function myFlameTowers(){
   return getRenderTowers().filter(t=>t.type==='flame' && t.level>=MAX_LEVEL);
 }
 function updateSkillBtn(){
-  const flames = myFlameTowers();
-  if(!flames.length){ skillBtn.classList.add('hidden'); return; }
-  skillBtn.classList.remove('hidden');
-  // 쿨다운이 가장 짧은(=곧 쓸 수 있는) 화염탑 기준 표시
-  let minCd = Infinity;
-  for(const t of flames) minCd = Math.min(minCd, t.skillCd||0);
-  if(minCd>0){
-    skillBtn.classList.add('cool');
-    skillCdTxt.textContent = Math.ceil(minCd);
-  } else {
-    skillBtn.classList.remove('cool');
-    skillCdTxt.textContent = '';
-  }
+  // 스킬 버튼은 유닛 상태창(좌측 하단) 안으로 이동함 → 기존 우하단 버튼은 항상 숨김
+  skillBtn.classList.add('hidden');
 }
 
 /* ---------------- 메인 루프 ---------------- */

@@ -120,22 +120,29 @@ input{font-family:inherit;}
 #connBanner{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:17;background:rgba(224,87,74,.9);
   color:#fff;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;display:none;pointer-events:none;}
 
-#towerBar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:8px;
-  padding:8px calc(env(safe-area-inset-right) + 8px) calc(env(safe-area-inset-bottom) + 10px) calc(env(safe-area-inset-left) + 8px);
-  z-index:15;background:linear-gradient(to top,rgba(6,8,14,.85),rgba(6,8,14,0));pointer-events:none;}
-.towerBtn{pointer-events:auto;width:66px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;
-  background:var(--panel);border:1.5px solid var(--panel-b);border-radius:12px;padding:7px 4px 6px;}
-.towerBtn .ic{width:26px;height:26px;}
+#towerBar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:6px;
+  padding:6px calc(env(safe-area-inset-right) + 6px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 6px);
+  z-index:15;background:linear-gradient(to top,rgba(6,8,14,.85),rgba(6,8,14,0));pointer-events:none;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;}
+#towerBar::-webkit-scrollbar{display:none;}
+.towerBtn{pointer-events:auto;width:56px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:var(--panel);border:1.5px solid var(--panel-b);border-radius:11px;padding:6px 3px 5px;}
+.towerBtn .ic{width:22px;height:22px;}
 .ic.shape-archer{border-radius:50%;}
 .ic.shape-cannon{border-radius:5px;}
-.ic.shape-frost{transform:rotate(45deg);border-radius:3px;width:20px;height:20px;margin:3px auto;}
+.ic.shape-frost{transform:rotate(45deg);border-radius:3px;width:17px;height:17px;margin:2px auto;}
 .ic.shape-mage{border-radius:0;clip-path:polygon(50% 0%,0% 100%,100% 100%);}
 .ic.shape-flame{border-radius:50% 50% 50% 0;transform:rotate(45deg);}
 .ic.shape-bank{border-radius:3px;clip-path:polygon(50% 0%,100% 38%,100% 100%,0% 100%,0% 38%);}
 .ic.shape-awaken{clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);}
-.towerBtn .nm{font-size:10.5px;font-weight:700;color:var(--parch);}
-.towerBtn .cost{font-size:10.5px;font-weight:700;color:var(--gold);}
-.towerBtn.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(232,177,61,.35),0 0 14px rgba(232,177,61,.35);
+.ic.shape-fortress{border-radius:2px;clip-path:polygon(0% 22%,15% 22%,15% 0%,32% 0%,32% 22%,50% 22%,50% 0%,68% 0%,68% 22%,85% 22%,85% 0%,100% 0%,100% 100%,0% 100%);}
+.towerBtn.edit{border-style:dashed;}
+.towerBtn .rm{position:absolute;top:-6px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--crimson);
+  color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;}
+.towerBtn{position:relative;}
+.towerBtn .nm{font-size:9.5px;font-weight:700;color:var(--parch);}
+.towerBtn .cost{font-size:9.5px;font-weight:700;color:var(--gold);}
+.towerBtn.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(232,177,61,.35),0 0 12px rgba(232,177,61,.35);
   background:rgba(232,177,61,.14);}
 .towerBtn.poor{opacity:.4;}
 
@@ -149,52 +156,61 @@ input{font-family:inherit;}
 #readyBtn{background:linear-gradient(180deg,#7fd06a,#3f8f34);color:#0b2a08;border:none;border-radius:10px;
   padding:9px 16px;font-size:14px;font-weight:900;box-shadow:0 3px 0 #2c6b22;}
 #readyBtn.done{filter:grayscale(.4);opacity:.7;}
+#loadoutBtn{background:rgba(79,195,217,.18);color:var(--teal);border:1px solid var(--teal);border-radius:10px;
+  padding:9px 12px;font-size:13px;font-weight:900;}
+#loadoutDrawer{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 104px);transform:translateX(-50%);z-index:16;
+  width:min(440px,94vw);background:var(--panel);border:1px solid var(--teal);border-radius:14px;padding:12px 12px 14px;
+  box-shadow:0 8px 26px rgba(0,0,0,.55);}
+#loadoutDrawer.hidden{display:none;}
+#loadoutDrawer .lh{font-size:13px;font-weight:900;color:var(--teal);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+#loadoutDrawer .lh .lx{background:none;border:none;color:var(--parch);opacity:.7;font-size:16px;}
+#loadoutDrawer .lgrid{display:flex;flex-wrap:wrap;gap:6px;}
+.loBtn{width:60px;display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(255,255,255,.05);
+  border:1.5px solid var(--line);border-radius:10px;padding:6px 3px 5px;position:relative;}
+.loBtn .ic{width:20px;height:20px;}
+.loBtn .nm{font-size:9px;font-weight:700;color:var(--parch);}
+.loBtn.on{border-color:var(--teal);background:rgba(79,195,217,.16);}
+.loBtn.on::after{content:'✓';position:absolute;top:-6px;right:-4px;width:16px;height:16px;border-radius:50%;
+  background:var(--teal);color:#062229;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+#loadoutDrawer .lhint{font-size:10.5px;opacity:.6;margin-top:8px;line-height:1.4;}
 
-/* 오른쪽 UP 패널 */
+/* 오른쪽 UP 패널 (일괄UP 토글 버튼만) */
 #upPanel{position:fixed;right:calc(env(safe-area-inset-right) + 6px);top:50%;transform:translateY(-50%);z-index:15;
   display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none;}
 #upPanel.hidden{display:none;}
-.upToggle{pointer-events:auto;width:52px;height:48px;border-radius:12px;line-height:1.05;
-  background:var(--panel);border:1.5px solid var(--gold);color:var(--gold);font-size:13px;font-weight:900;}
-.upToggle.active{background:rgba(232,177,61,.22);box-shadow:0 0 12px rgba(232,177,61,.45);}
-.upList{display:none;flex-direction:column;gap:6px;align-items:flex-end;}
-.upList.open{display:flex;}
-.upBtn{pointer-events:auto;width:52px;display:flex;flex-direction:column;align-items:center;gap:3px;
-  background:var(--panel);border:1.5px solid var(--panel-b);border-radius:11px;padding:7px 3px 6px;}
-.upBtn .ui{width:22px;height:22px;}
-.upBtn .uc{font-size:10px;font-weight:800;color:var(--gold);opacity:.9;}
-.upBtn.poor{opacity:.4;}
-.upBtn.none{display:none;}
+.upToggle{pointer-events:auto;width:46px;height:42px;border-radius:11px;line-height:1.05;
+  background:var(--panel);border:1.5px solid var(--gold);color:var(--gold);font-size:12px;font-weight:900;}
+.upToggle.active{background:rgba(232,177,61,.28);box-shadow:0 0 12px rgba(232,177,61,.5);}
 
-/* 화염 스킬 버튼 */
+/* 화염 스킬 버튼 (미사용: 상태창 내부로 이동) */
 #skillBtn{position:fixed;right:calc(env(safe-area-inset-right) + 10px);bottom:calc(env(safe-area-inset-bottom) + 100px);
-  z-index:16;width:66px;height:66px;border-radius:50%;border:2px solid #ff8c32;
-  background:radial-gradient(circle at 40% 35%, #ffb14a, #d2461a);color:#fff;font-size:26px;font-weight:900;
+  z-index:16;width:60px;height:60px;border-radius:50%;border:2px solid #ff8c32;
+  background:radial-gradient(circle at 40% 35%, #ffb14a, #d2461a);color:#fff;font-size:24px;font-weight:900;
   box-shadow:0 4px 16px rgba(210,70,20,.6);display:flex;align-items:center;justify-content:center;}
 #skillBtn.hidden{display:none;}
 #skillBtn.cool{filter:grayscale(.7) brightness(.7);border-color:#777;}
-#skillBtn #skillCdTxt{position:absolute;font-size:15px;font-family:'Black Han Sans',sans-serif;}
+#skillBtn #skillCdTxt{position:absolute;font-size:14px;font-family:'Black Han Sans',sans-serif;}
 
-#infoPopup{position:fixed;left:calc(env(safe-area-inset-left) + 8px);bottom:calc(env(safe-area-inset-bottom) + 96px);
-  z-index:16;background:var(--panel);border:1.5px solid var(--gold);border-radius:13px;padding:11px 12px;width:190px;
+#infoPopup{position:fixed;left:calc(env(safe-area-inset-left) + 7px);bottom:calc(env(safe-area-inset-bottom) + 84px);
+  z-index:16;background:var(--panel);border:1.5px solid var(--gold);border-radius:12px;padding:9px 10px;width:168px;
   box-shadow:0 8px 26px rgba(0,0,0,.55);}
 #infoPopup.hidden{display:none;}
-#infoPopup .ttl{font-size:14px;font-weight:900;color:var(--gold);display:flex;justify-content:space-between;align-items:center;}
-#infoPopup .ttlLv{font-size:11px;color:var(--parch);opacity:.75;font-weight:700;margin-left:6px;margin-right:auto;}
-#infoPopup .stats{margin:7px 0 9px;display:flex;flex-direction:column;gap:3px;}
-#infoPopup .sr{display:flex;justify-content:space-between;font-size:11px;}
+#infoPopup .ttl{font-size:12.5px;font-weight:900;color:var(--gold);display:flex;justify-content:space-between;align-items:center;}
+#infoPopup .ttlLv{font-size:10px;color:var(--parch);opacity:.75;font-weight:700;margin-left:5px;margin-right:auto;}
+#infoPopup .stats{margin:6px 0 8px;display:flex;flex-direction:column;gap:2px;}
+#infoPopup .sr{display:flex;justify-content:space-between;font-size:10px;}
 #infoPopup .sr span{opacity:.62;}
 #infoPopup .sr b{color:var(--parch);font-weight:800;}
-#infoPopup .row{display:flex;gap:6px;}
-#infoPopup button{flex:1;padding:8px 2px;border-radius:8px;border:none;font-size:11.5px;font-weight:700;}
+#infoPopup .row{display:flex;gap:5px;}
+#infoPopup button{flex:1;padding:7px 2px;border-radius:7px;border:none;font-size:10.5px;font-weight:700;}
 #infoPopup .up{background:var(--gold);color:#2a1a05;}
 #infoPopup .up:disabled{opacity:.4;}
 #infoPopup .sl{background:rgba(224,87,74,.18);color:var(--crimson);border:1px solid var(--crimson-dim) !important;}
-#infoPopup .x{background:none;color:var(--parch);opacity:.6;font-size:15px;padding:0;flex:none;width:20px;}
-#infoPopup .skillMini{flex:none;width:34px;height:26px;margin-right:4px;border:1.5px solid #ff8c32;border-radius:8px;
-  background:radial-gradient(circle at 40% 35%,#ffb14a,#d2461a);color:#fff;font-size:14px;font-weight:900;
+#infoPopup .x{background:none;color:var(--parch);opacity:.6;font-size:14px;padding:0;flex:none;width:18px;}
+#infoPopup .skillMini{flex:none;width:30px;height:23px;margin-right:3px;border:1.5px solid #ff8c32;border-radius:7px;
+  background:radial-gradient(circle at 40% 35%,#ffb14a,#d2461a);color:#fff;font-size:12px;font-weight:900;
   display:flex;align-items:center;justify-content:center;gap:1px;position:relative;box-shadow:0 0 8px rgba(210,70,20,.5);}
-#infoPopup .skillMini span{font-size:10px;}
+#infoPopup .skillMini span{font-size:9px;}
 #infoPopup .skillMini.cool{filter:grayscale(.6) brightness(.72);border-color:#888;box-shadow:none;}
 
 #gameOverScreen h2{font-size:30px;color:var(--crimson);}
@@ -239,7 +255,7 @@ input{font-family:inherit;}
         <input id="joinCodeInput" maxlength="4" placeholder="예: A3K9" autocapitalize="characters" autocomplete="off" spellcheck="false">
       </div>
       <button class="btn btn-gold" id="menuActionBtn">방 만들기</button>
-      <div class="hint" style="margin-top:12px;">2인 협동 · 링크 하나로 초대 · 별도 설치 없음</div>
+      <div class="hint" style="margin-top:12px;">최대 4인 협동 · 링크 하나로 초대 · 별도 설치 없음</div>
     </div>
 
     <div class="card hidden" id="waitPanel">
@@ -271,8 +287,12 @@ input{font-family:inherit;}
   <!-- 준비 페이즈 안내 + 준비완료 버튼 -->
   <div id="prepBar" class="hidden">
     <div id="prepInfo">준비 시간 <span id="prepTimeTxt">5:00</span></div>
+    <button id="loadoutBtn">유닛 편성</button>
     <button id="readyBtn">준비 완료</button>
   </div>
+
+  <!-- 유닛 편성 드로어 (준비 페이즈 전용) -->
+  <div id="loadoutDrawer" class="hidden"></div>
 
   <!-- 오른쪽 종류별 일괄 업그레이드(UP) 패널 -->
   <div id="upPanel"></div>
@@ -318,16 +338,93 @@ const CDN_LIST = [
 ];
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-const WORLD_W = 5200, WORLD_H = 760, LANE_Y = 380, BASE_X = 110, SPAWN_X = WORLD_W - 110;
-const LANE_NOBUILD = 85;      // 이 거리 안쪽(길 주변)은 설치 불가
-const BUILD_MARGIN = 55;      // 맵 상/하단 여백
-const BASE_MARGIN = 90;       // 기지/스폰 포탈 주변 설치 금지 폭
-const MIN_TOWER_GAP = 62;     // 타워 간 최소 간격
+const WORLD_W = 5500, WORLD_H = 900;
+const LANE_NOBUILD = 62;      // 경로 중심선에서 이 거리 안쪽은 설치 불가 (촘촘한 길에 맞춰 축소)
+const BUILD_MARGIN = 45;      // 맵 상/하단 여백
+const BASE_MARGIN = 70;       // 기지/스폰 주변 설치 금지 폭
+const MIN_TOWER_GAP = 60;     // 타워 간 최소 간격
 const MAX_TOWERS = 25;        // 필드 보유 가능한 최대 타워 수
 const MAX_LEVEL = 5;          // 전 유닛 최대 레벨
 const PREP_TIME = 8, FIRST_PREP = 6;
 const LOBBY_PREP_TIME = 300;  // 게임 시작 후 준비 페이즈 (5분)
 const SYNC_INTERVAL = 0.09;
+
+// 직각으로만 꺾이는 촘촘한 지그재그 경로 (왼쪽 스폰 → 오른쪽 기지). 곡선 없음.
+// 치킨맵 참고: 계단식 잔꺾임 + 상단 왕복 + 하단 지그재그로 길고 구불구불하게.
+const LANE_R1 = 150, LANE_R2 = 300, LANE_R3 = 450, LANE_R4 = 600, LANE_R5 = 760;
+const PATH = [
+  // 좌측 상단 스폰에서 출발해 오른쪽으로 향하며 계단식으로 오르내림 (짧게 축약)
+  {x:120,  y:LANE_R2},   // 스폰(좌측)
+  {x:900,  y:LANE_R2},
+  {x:900,  y:LANE_R4},   // 아래로
+  {x:1750, y:LANE_R4},
+  {x:1750, y:LANE_R1},   // 위로 크게
+  {x:2650, y:LANE_R1},
+  {x:2650, y:LANE_R5},   // 하단까지 쭉
+  {x:3550, y:LANE_R5},
+  {x:3550, y:LANE_R2},   // 위로 복귀
+  {x:4450, y:LANE_R2},
+  {x:4450, y:LANE_R3},   // 우측 기지 앞 정리
+  {x:5300, y:LANE_R3}    // 기지(우측)
+];
+PATH.reverse();   // 기지↔적스폰 위치 스왑: 이제 PATH[0]=우측(적 스폰), 마지막=좌측(팀 기지)
+const SPAWN_X = PATH[0].x, SPAWN_Y = PATH[0].y;
+const BASE_X = PATH[PATH.length-1].x, BASE_Y = PATH[PATH.length-1].y;
+const LANE_Y = LANE_R3;   // 하위 호환용 참조 (일부에서 사용)
+
+// 경로 총 길이 및 세그먼트 누적 길이
+const PATH_SEGS = (function(){
+  const segs=[]; let total=0;
+  for(let i=0;i<PATH.length-1;i++){
+    const a=PATH[i], b=PATH[i+1];
+    const len=Math.hypot(b.x-a.x, b.y-a.y);
+    segs.push({a,b,len,start:total, dirx:(b.x-a.x)/len, diry:(b.y-a.y)/len});
+    total+=len;
+  }
+  return {segs, total};
+})();
+const PATH_TOTAL = PATH_SEGS.total;
+
+// 경로 진행거리(dist)에 해당하는 좌표 반환
+function pathPos(dist){
+  const segs = PATH_SEGS.segs;
+  if(dist<=0) return {x:PATH[0].x, y:PATH[0].y};
+  if(dist>=PATH_TOTAL) return {x:BASE_X, y:BASE_Y};
+  for(const s of segs){
+    if(dist <= s.start+s.len){
+      const d = dist - s.start;
+      return {x:s.a.x + s.dirx*d, y:s.a.y + s.diry*d};
+    }
+  }
+  return {x:BASE_X, y:BASE_Y};
+}
+// 임의 점(px,py)이 경로상 어느 진행거리(dist)에 대응하는지 (요새탑 위치 산출용)
+function projectToPathDist(px,py){
+  let best=Infinity, bestDist=0;
+  for(const s of PATH_SEGS.segs){
+    const vx=s.b.x-s.a.x, vy=s.b.y-s.a.y;
+    const wx=px-s.a.x, wy=py-s.a.y;
+    const t=Math.max(0, Math.min(1, (wx*vx+wy*vy)/(s.len*s.len)));
+    const cx=s.a.x+vx*t, cy=s.a.y+vy*t;
+    const d=Math.hypot(px-cx, py-cy);
+    if(d<best){ best=d; bestDist=s.start + s.len*t; }
+  }
+  return bestDist;
+}
+// 임의 점(px,py)에서 경로까지 최단거리 (설치 금지 판정용)
+function distToPath(px,py){
+  let best=Infinity;
+  for(const s of PATH_SEGS.segs){
+    // 선분 a-b에 대한 점-선분 거리
+    const vx=s.b.x-s.a.x, vy=s.b.y-s.a.y;
+    const wx=px-s.a.x, wy=py-s.a.y;
+    const t=Math.max(0, Math.min(1, (wx*vx+wy*vy)/(s.len*s.len)));
+    const cx=s.a.x+vx*t, cy=s.a.y+vy*t;
+    const d=Math.hypot(px-cx, py-cy);
+    if(d<best) best=d;
+  }
+  return best;
+}
 
 const COL_GOLD = '#e8b13d', COL_CRIMSON = '#e0574a', COL_TEAL = '#4fc3d9';
 
@@ -337,13 +434,27 @@ const TOWER_TYPES = {
   frost:{name:'서리탑',cost:70,range:145,dmg:5,rate:0.9,slow:0.5,slowDur:1.6,proj:'shard',speed:460,color:'#5fd0e8',dark:'#2c7f92'},
   mage:{name:'마법탑',cost:125,range:185,dmg:19,rate:0.85,proj:'bolt',speed:600,color:'#b579e0',dark:'#6e3f8f'},
   flame:{name:'화염탑',cost:110,range:130,dmg:9,rate:0.35,proj:'fire',speed:420,color:'#f0803a',dark:'#8f4416',
-    skillCd:30, skillDur:10, skillTick:0.1},   // 5렙 수동 스킬: 30초 쿨 / 10초간 0.1초마다 길 전체에 도트
+    skillCd:120, skillDur:30, skillTick:0.1,
+    burnDur:3, burnTick:0.5, burnDmg:6,        // 기본공격 명중 시 도트: 3초간 0.5초마다 burnDmg
+    trailDur:10, trailTick:0.5, trailDmg:5, trailR:34,  // 적이 지나간 자리 불길: 10초 지속, 반경 내 도트
+    blueHits:7, blueMult:2.2},                 // 같은 적 7회 이상 명중 시 파란불(피해 배수)
   bank:{name:'은행탑',cost:120,range:0,dmg:0,rate:99,proj:'none',speed:1,color:'#e8c84a',dark:'#8f7a1c',
     income:18},   // 웨이브마다 income*level 골드 지급
   awaken:{name:'각성자',cost:200,range:175,dmg:26,rate:0.7,proj:'star',speed:640,color:'#ff5db0',dark:'#8f2f68',
-    infinite:true, decayWaves:5}   // 무한 업그레이드, 5웨이브 미업글 시 -1레벨
+    infinite:true, decayWaves:5,
+    skillCd:15, skillLevel:5,          // Lv.5부터 스킬(에너지파) 사용 가능
+    waveLevel:10, waveBonusLevel:20,   // Lv.10부터 기본공격이 에너지파 / Lv.20부터 레벨당 +1%
+    waveWidth:70, waveDmgMult:1.6},    // 에너지파: 관통 폭 / 피해 배수
+  fortress:{name:'요새탑',cost:100,range:120,dmg:16,rate:0.8,proj:'rock',speed:380,color:'#9aa3b2',dark:'#565d6c',
+    skillCd:12,                 // 스킬: 누적시킨 피해량만큼 체력의 벽을 길 위에 생성
+    wallLife:16, wallR:24}      // 벽 지속시간(초) / 접촉 반경
 };
-const TOWER_ORDER = ['archer','cannon','frost','mage','flame','bank','awaken'];
+// 전체 유닛 종류(편성 후보). 실제 타워바에는 편성된 7종만 노출.
+const TOWER_ORDER_ALL = ['archer','cannon','frost','mage','flame','bank','awaken','fortress'];
+const LOADOUT_MAX = 7;   // 동시에 장착 가능한 유닛 종류 수
+const DEFAULT_LOADOUT = ['archer','cannon','frost','mage','flame','bank','awaken'];
+let loadout = DEFAULT_LOADOUT.slice();   // 현재 편성된 유닛 종류 (호스트 권위, 스냅샷 동기화)
+let loadoutEditOpen = false;
 
 const ENEMY_TYPES = {
   normal:{hp:42,speed:56,gold:8,r:13,dmg:1,color:'#d95b4a'},
@@ -356,11 +467,14 @@ const ENEMY_TYPES = {
   brute:{hp:520,speed:26,gold:60,r:26,dmg:4,color:'#3a2f47',armor:4}          // 보스급 거대체
 };
 
-// 설치 가능 여부: 길(LANE_NOBUILD) · 기지/스폰 주변(BASE_MARGIN) · 맵 밖 제외한 전 구역
+// 설치 가능 여부: 경로 근처(LANE_NOBUILD)·기지/스폰 주변·맵 밖 제외
 function isBuildableSpot(x,y){
-  if(x < BASE_X+BASE_MARGIN || x > SPAWN_X-BASE_MARGIN) return false;
+  if(x < 60 || x > WORLD_W-60) return false;
   if(y < BUILD_MARGIN || y > WORLD_H-BUILD_MARGIN) return false;
-  if(Math.abs(y-LANE_Y) < LANE_NOBUILD) return false;
+  if(distToPath(x,y) < LANE_NOBUILD) return false;
+  // 스폰/기지 포탈 주변 금지
+  if(Math.hypot(x-SPAWN_X, y-SPAWN_Y) < BASE_MARGIN+20) return false;
+  if(Math.hypot(x-BASE_X, y-BASE_Y) < BASE_MARGIN+20) return false;
   return true;
 }
 
@@ -377,16 +491,21 @@ const skipBtn = $('skipBtn'), leaveBtn = $('leaveBtn'), connBanner = $('connBann
 const eventBanner = $('eventBanner'), eventTxt = $('eventTxt'), eventSub = $('eventSub');
 const towerBarEl = $('towerBar'), popupEl = $('infoPopup');
 const prepBar = $('prepBar'), prepTimeTxt = $('prepTimeTxt'), readyBtn = $('readyBtn');
+const loadoutBtn = $('loadoutBtn'), loadoutDrawer = $('loadoutDrawer');
 const upPanel = $('upPanel'), skillBtn = $('skillBtn'), skillCdTxt = $('skillCdTxt');
 let bulkUpOpen = false;   // '일괄UP' 버튼으로 종류 선택 목록이 펼쳐졌는지
 const finalWaveTxt = $('finalWave'), retryBtn = $('retryBtn'), exitBtn = $('exitBtn');
 
 /* ---------------- 상태 ---------------- */
+const MAX_PLAYERS = 4;         // 방 최대 인원 (방장 포함)
 let mode = 'host';            // 'host' | 'join' (로비 탭)
 let currentScreen = 'lobby';  // 'lobby' | 'game'
 let roomCode = '';
-let myName = '', peerName = '';
-let isHost = false, netMod = null, room = null, peerId = null;
+let myName = '';
+let myPid = null;              // 내 고유 플레이어 ID ('host' 또는 랜덤). 모든 입력에 실려 감
+let isHost = false, netMod = null, room = null;
+let peers = {};                // 호스트: 접속한 게스트 pid -> {name}  (게스트에선 미사용)
+let roster = [];               // [{pid,name,host}] 방장이 관리·브로드캐스트하는 참가자 명단
 const act = {};                // trystero 액션 [send,get] 모음
 let inputSeq = 1;
 const pendingActions = {};     // id -> action (게스트: 낙관적 UI 정리용)
@@ -396,8 +515,13 @@ let guestState = null;         // 게스트: 최근 스냅샷 요약
 let guestEnemies = {};         // 게스트: id -> {type,x,rx,hp,maxHp}
 let guestTowers = [];
 let guestProjectiles = [];
+let guestFireTrails = [];      // 게스트: 불길 트레일 [{x,y,blue}]
+let guestWalls = [];           // 게스트: 요새탑 벽 [{x,y,hp,maxHp,life}]
 let syncAccum = 0;
 let gameOverShown = false;
+// 접속한 게스트가 하나라도 있는지 (동기화 전송 게이트)
+function hasPeers(){ return Object.keys(peers).length>0; }
+function playerCount(){ return isHost ? (1 + Object.keys(peers).length) : roster.length || 2; }
 
 let selectedTowerType = null;
 let ghosts = {};               // actionId -> {x,y,type,t} (설치 요청 낙관적 표시)
@@ -554,57 +678,90 @@ function mkAction(r, name){
   return [a.send || a[0], a.onMessage || a.get || a[1]];
 }
 function setupActions(){
-  act.lobby = mkAction(room,'lobby');
+  act.lobby = mkAction(room,'lobby');     // 게스트→호스트: 참가 알림 {pid,name}
+  act.roster= mkAction(room,'roster');    // 호스트→전체: 참가자 명단 브로드캐스트
   act.start = mkAction(room,'start');
   act.sync  = mkAction(room,'sync');
-  act.input = mkAction(room,'input');
-  act.inres = mkAction(room,'inres');
-  act.leave = mkAction(room,'leave');
+  act.input = mkAction(room,'input');      // 게스트→호스트: {from,pid,...action}
+  act.inres = mkAction(room,'inres');      // 호스트→전체: {to,id,ok,reason}
+  act.leave = mkAction(room,'leave');      // 게스트→호스트: {pid}
 
-  act.lobby[1]((data)=>{ peerName = (data && data.name) || '플레이어'; if(currentScreen==='lobby') renderWaitPanel(); });
+  act.lobby[1]((data)=>{
+    if(!isHost || !data || !data.pid) return;
+    // 정원 초과 시 무시 (방장 포함 MAX_PLAYERS)
+    if(!peers[data.pid] && (1+Object.keys(peers).length) >= MAX_PLAYERS){ return; }
+    peers[data.pid] = {name: (data.name||'플레이어')};
+    rebuildRoster();
+    broadcastRoster();
+    if(currentScreen==='lobby') renderWaitPanel();
+  });
+  act.roster[1]((data)=>{
+    if(isHost) return;
+    roster = (data && Array.isArray(data.list)) ? data.list : roster;
+    if(currentScreen==='lobby') renderWaitPanel();
+  });
   act.start[1]((data)=>{ onNetStart(data); });
   act.sync[1]((data)=>{ onNetSync(data); });
   act.input[1]((data)=>{
     if(isHost){
-      const res = applyInput(data, 'guest');
-      act.inres[0]({id:data.id, ok:res.ok, reason:res.reason});
+      const pid = data && data.from ? data.from : 'guest';
+      const res = applyInput(data, pid);
+      act.inres[0]({to:pid, id:data.id, ok:res.ok, reason:res.reason});
     }
   });
   act.inres[1]((data)=>{
+    if(isHost) return;
+    if(data.to && data.to!==myPid) return;   // 나에게 온 응답만 처리
     delete pendingActions[data.id];
     delete ghosts[data.id];
     if(!data.ok) toast(errText(data.reason));
   });
-  act.leave[1]((_data)=>{ onPeerGone(); });
+  act.leave[1]((data)=>{
+    if(isHost && data && data.pid){ delete peers[data.pid]; rebuildRoster(); broadcastRoster(); }
+    onPeerGone();
+  });
 
   if(typeof room.onPeerJoin==='function'){
     room.onPeerJoin((pid)=>{
-      peerId = pid;
       hideConnBanner();
-      act.lobby[0]({name: myName});
+      // 게스트: 방장에게 내 참가 정보 전송 / 방장: 명단 재전송
+      if(!isHost){ act.lobby[0]({pid:myPid, name:myName}); }
+      else { broadcastRoster(); }
       if(currentScreen==='lobby') renderWaitPanel();
     });
   }
   if(typeof room.onPeerLeave==='function'){
-    room.onPeerLeave((_pid)=>{ onPeerGone(); });
+    room.onPeerLeave((_pid)=>{
+      // Trystero peerId와 우리 pid 매핑이 없으므로, 명단 정합은 leave 액션으로 처리.
+      if(currentScreen==='game') showConnBanner();
+      if(currentScreen==='lobby') renderWaitPanel();
+    });
   }
 }
+// 호스트: peers로 roster 재구성 (방장 먼저)
+function rebuildRoster(){
+  roster = [{pid:'host', name:myName, host:true}];
+  for(const pid of Object.keys(peers)) roster.push({pid, name:peers[pid].name, host:false});
+}
+function broadcastRoster(){ if(isHost && act.roster) act.roster[0]({list:roster}); }
 function onPeerGone(){
-  peerId = null;
   if(currentScreen==='game') showConnBanner();
   if(currentScreen==='lobby') renderWaitPanel();
 }
 async function connectRoom(code, asHost){
   isHost = asHost;
+  myPid = asHost ? 'host' : ('p'+Math.random().toString(36).slice(2,9));
   roomCode = code;
+  peers = {};
+  roster = asHost ? [{pid:'host', name:myName, host:true}] : [];
   if(!netMod) netMod = await loadTrystero();
   room = netMod.joinRoom({appId:APP_ID, relayUrls:TRY_RELAYS, relayRedundancy:TRY_RELAYS.length}, 'TD-'+code);
   setupActions();
 }
 function leaveRoom(){
-  try{ if(room && act.leave) act.leave[0]({}); }catch(e){}
+  try{ if(room && act.leave && !isHost) act.leave[0]({pid:myPid}); }catch(e){}
   try{ if(room && typeof room.leave==='function') room.leave(); }catch(e){}
-  room = null; peerId = null; sim = null; guestState = null;
+  room = null; peers = {}; roster = []; sim = null; guestState = null;
   Snd.stopBgm();
 }
 function submitAction(action){
@@ -613,6 +770,7 @@ function submitAction(action){
     if(!res.ok) toast(errText(res.reason));
   } else {
     action.id = 'i'+(inputSeq++);
+    action.from = myPid;
     if(action.type==='place') addGhost(action.id, action.x, action.y, action.towerType);
     pendingActions[action.id] = action;
     if(act.input) act.input[0](action);
@@ -671,16 +829,22 @@ function renderWaitPanel(){
   html += '<button class="iconBtn" id="copyBtn" title="복사">📋</button>';
   html += '<button class="iconBtn" id="shareBtn" title="공유">📤</button></div>';
   html += '<div class="playerList" style="margin-top:14px;">';
-  html += '<div class="pRow me"><span class="pDot"></span>'+escapeHtml(myName)+' (나)'+(isHost?' · 방장':'')+'</div>';
-  if(peerId){
-    html += '<div class="pRow peer"><span class="pDot"></span>'+escapeHtml(peerName||'플레이어')+'</div>';
-  } else {
-    html += '<div class="pRow empty"><span class="pDot"></span>친구를 기다리는 중...</div>';
+  // 명단: 호스트는 roster(자기 관리), 게스트는 수신한 roster. 없으면 나만 표시.
+  const list = (roster && roster.length) ? roster : [{pid:myPid, name:myName, host:isHost}];
+  for(const p of list){
+    const isMe = (p.pid===myPid);
+    const cls = isMe ? 'me' : 'peer';
+    html += '<div class="pRow '+cls+'"><span class="pDot"></span>'+escapeHtml(p.name||'플레이어')
+      + (isMe?' (나)':'') + (p.host?' · 방장':'') + '</div>';
+  }
+  // 남은 슬롯 표시
+  for(let i=list.length; i<MAX_PLAYERS; i++){
+    html += '<div class="pRow empty"><span class="pDot"></span>빈 자리 (참가 대기중...)</div>';
   }
   html += '</div>';
   if(isHost){
     html += '<button class="btn btn-gold" id="startBtn">게임 시작</button>';
-    html += '<div class="hint" style="margin-top:8px;">혼자서도 시작할 수 있어요 (2인 협동 권장)</div>';
+    html += '<div class="hint" style="margin-top:8px;">최대 '+MAX_PLAYERS+'인 협동 · 혼자서도 시작 가능</div>';
   } else {
     html += '<div class="hint" style="margin-top:14px;">방장이 게임을 시작하기를 기다리는 중...</div>';
   }
@@ -717,20 +881,38 @@ function resetLobbyUI(){
 })();
 
 /* ---------------- 시뮬레이션 (호스트 권위) ---------------- */
-function newSim(){
+function newSim(players){
+  const pids = (players && players.length) ? players.slice() : ['host'];
+  const golds = {}; const ready = {};
+  for(const pid of pids){ golds[pid] = 150; ready[pid] = false; }
   return {
-    gold:150, lives:20, wave:0,
+    players: pids,                // 참가 플레이어 pid 목록 (게임 시작 시점 고정)
+    golds, ready,                 // pid별 골드 풀 / 준비 상태
+    lives:20, wave:0,
     phase:'prep',                 // 'prep'(로비 준비) → 'battle'
     prepTimer:LOBBY_PREP_TIME,    // 5분 준비 카운트다운
-    readyHost:false, readyGuest:false,
     waveActive:false, waveTimer:FIRST_PREP,
     spawnQueue:[], spawnTimer:0, spawnInterval:0.9,
     enemies:[], towers:[], projectiles:[],
     nextEnemyId:1, nextTowerId:1, nextProjId:1,
     fireZones:[],                 // 활성 불바다 [{until, tickAcc}]
+    flameSkillT:0,                // 화염탑 스킬 활성 남은 시간(초) — 기본공격 강화 지속
+    fireTrails:[],                // 불타는 적이 남긴 불길 [{x,y,until,tickAcc}]
+    walls:[], nextWallId:1,       // 요새탑 스킬로 생성된 벽 [{id,x,y,dist,hp,maxHp,life,owner}]
+    loadout: loadout.slice(),     // 팀 유닛 편성 (준비 페이즈에 변경 가능)
     gameOver:false, pendingEvents:[],
     sfxFire:{}, sfxKill:0, sfxBaseHit:0   // 동기화 구간 누적 (게스트 사운드용)
   };
+}
+// pid별 골드 접근 헬퍼 (호스트 시뮬레이션 내부용)
+function simGold(pid){ return sim.golds[pid] || 0; }
+function addGold(pid, amt){ if(sim.golds[pid]==null) sim.golds[pid]=0; sim.golds[pid] += amt; }
+function addGoldBoth(amt){ for(const pid of sim.players) sim.golds[pid] += amt; }   // 전원에게 지급
+// 킬 골드: 웨이브가 오를수록 획득량 증가 (기본골드 × 웨이브 배수)
+function killGold(type){
+  const g = ENEMY_TYPES[type].gold;
+  const mult = 1 + (sim.wave-1)*0.12 + waveTier(sim.wave)*0.5;   // 웨이브·구간 비례 증가
+  return Math.round(g * mult);
 }
 function pushEvent(evt){ sim.pendingEvents.push(evt); showBanner(evt); }
 
@@ -781,11 +963,13 @@ function spawnEnemy(type){
   const hp = Math.round(def.hp*scale);
   sim.enemies.push({
     id: sim.nextEnemyId++, type,
-    x: SPAWN_X,
+    dist: 0, px: SPAWN_X, py: SPAWN_Y, x: SPAWN_X,   // x는 하위호환용(=px)
     hp, maxHp: hp,
     speed: def.speed*spdScale(sim.wave),
     dmg: def.dmg, armor: def.armor||0, heal: def.heal||0, healR: def.healR||0,
-    healAcc:0, slowT:0, slowFactor:1
+    healAcc:0, slowT:0, slowFactor:1,
+    burnT:0, burnAcc:0, burnDmg:0, blue:false,   // 화염 도트 상태
+    flameHits:0, trailAcc:0                        // 화염탑 명중 누적 / 불길 생성 누적
   });
 }
 function towerStat(type, level, key){
@@ -794,9 +978,14 @@ function towerStat(type, level, key){
   if(base===undefined) return 0;
   if(def.infinite){
     // 각성자: 레벨 오를수록 증가폭이 조금씩 줄지만(효율 체감) 절대치는 무한히 상승
-    if(key==='dmg') return base*(1 + 0.55*Math.log(level));   // 로그 성장
-    if(key==='range') return base*(1 + 0.06*Math.log(level)); // 사거리는 아주 완만
-    if(key==='rate') return base*Math.max(0.35, 1 - 0.10*Math.log(level)); // 연사도 점점 빨라지되 하한
+    if(key==='dmg'){
+      let d = base*(1 + 0.55*Math.log(level));   // 로그 성장
+      const bl = def.waveBonusLevel||Infinity;
+      if(level >= bl) d *= (1 + (level - bl + 1)*0.01);  // 20렙부터 1렙당 +1%
+      return d;
+    }
+    if(key==='range') return base*(1 + (level-1)*0.04);       // 레벨마다 +4% 사거리
+    if(key==='rate') return base*Math.max(0.2, 1 - (level-1)*0.05); // 레벨마다 공속 5%↑ (하한 0.2)
     return base;
   }
   if(key==='dmg' || key==='range') return base*(1+(level-1)*0.32);
@@ -817,14 +1006,26 @@ function applyInput(action, owner){
   if(action.type==='place'){
     const def = TOWER_TYPES[action.towerType];
     if(!def) return {ok:false, reason:'none'};
+    if(!loadout.includes(action.towerType)) return {ok:false, reason:'none'};
     if(sim.towers.length >= MAX_TOWERS) return {ok:false, reason:'max'};
     const x = action.x, y = action.y;
     if(typeof x!=='number' || typeof y!=='number') return {ok:false, reason:'none'};
     if(!isBuildableSpot(x,y)) return {ok:false, reason:'zone'};
     if(sim.towers.some(t=>{ const dx=t.x-x, dy=t.y-y; return dx*dx+dy*dy < MIN_TOWER_GAP*MIN_TOWER_GAP; })) return {ok:false, reason:'gap'};
-    if(sim.gold < def.cost) return {ok:false, reason:'gold'};
-    sim.gold -= def.cost;
-    sim.towers.push({id:sim.nextTowerId++, x, y, type:action.towerType, level:1, cd:0, owner, invested:def.cost, skillCd:0, lastUpWave:sim.wave});
+    if(simGold(owner) < def.cost) return {ok:false, reason:'gold'};
+    addGold(owner, -def.cost);
+    const tw = {id:sim.nextTowerId++, x, y, type:action.towerType, level:1, cd:0, owner, invested:def.cost, skillCd:0, lastUpWave:sim.wave};
+    if(action.towerType==='fortress') tw.stored = 0;   // 요새탑: 스킬용 누적 피해량
+    sim.towers.push(tw);
+    return {ok:true};
+  }
+  if(action.type==='loadout'){
+    // 준비 페이즈에만 편성 변경 허용 (팀 공유)
+    if(sim.phase!=='prep') return {ok:false, reason:'none'};
+    const list = Array.isArray(action.list) ? action.list.filter(x=>TOWER_TYPES[x]) : null;
+    if(!list || !list.length || list.length>LOADOUT_MAX) return {ok:false, reason:'none'};
+    sim.loadout = list.slice();
+    applyLoadout(sim.loadout);
     return {ok:true};
   }
   if(action.type==='upgrade'){
@@ -833,8 +1034,8 @@ function applyInput(action, owner){
     const inf = TOWER_TYPES[t.type].infinite;
     if(!inf && t.level>=MAX_LEVEL) return {ok:false, reason:'level'};   // 각성자는 상한 없음
     const cost = upgradeCost(t.type, t.level);
-    if(sim.gold<cost) return {ok:false, reason:'gold'};
-    sim.gold -= cost; t.level++; t.invested = (t.invested||TOWER_TYPES[t.type].cost)+cost;
+    if(simGold(owner)<cost) return {ok:false, reason:'gold'};
+    addGold(owner, -cost); t.level++; t.invested = (t.invested||TOWER_TYPES[t.type].cost)+cost;
     t.lastUpWave = sim.wave;   // 강등 타이머 리셋
     return {ok:true};
   }
@@ -847,32 +1048,81 @@ function applyInput(action, owner){
     let upped=0;
     for(const t of targets){
       const cost = upgradeCost(t.type, t.level);
-      if(sim.gold<cost) break;
-      sim.gold -= cost; t.level++; t.invested = (t.invested||TOWER_TYPES[t.type].cost)+cost; t.lastUpWave = sim.wave; upped++;
+      if(simGold(owner)<cost) break;
+      addGold(owner, -cost); t.level++; t.invested = (t.invested||TOWER_TYPES[t.type].cost)+cost; t.lastUpWave = sim.wave; upped++;
     }
     if(upped===0) return {ok:false, reason:'gold'};
     return {ok:true};
   }
   if(action.type==='skill'){
-    // 화염탑 5렙 수동 스킬 → 길 전체 불바다 발동
     const t = sim.towers.find(t=>t.id===action.towerId);
-    if(!t || t.type!=='flame' || t.level<MAX_LEVEL) return {ok:false, reason:'none'};
-    if(t.skillCd>0) return {ok:false, reason:'cd'};
-    const def = TOWER_TYPES.flame;
-    t.skillCd = def.skillCd;
-    sim.fireZones.push({until: def.skillDur, tickAcc:0});
-    pushEvent({t:'skill'});
-    return {ok:true};
+    if(!t) return {ok:false, reason:'none'};
+    // 화염탑 5렙 스킬 → 화염 강화 모드
+    if(t.type==='flame'){
+      if(t.level<MAX_LEVEL) return {ok:false, reason:'none'};
+      if(t.skillCd>0) return {ok:false, reason:'cd'};
+      const def = TOWER_TYPES.flame;
+      t.skillCd = def.skillCd;
+      sim.flameSkillT = def.skillDur;   // 30초간 화염탑 기본공격 강화 모드
+      pushEvent({t:'skill'});
+      return {ok:true};
+    }
+    // 각성자 5렙 스킬 → 에너지파 발사
+    if(t.type==='awaken'){
+      const def = TOWER_TYPES.awaken;
+      if(t.level < def.skillLevel) return {ok:false, reason:'none'};
+      if(t.skillCd>0) return {ok:false, reason:'cd'};
+      t.skillCd = def.skillCd;
+      fireEnergyWave(t, def.waveDmgMult);
+      // 10렙 이상: 레벨을 10으로 초기화하는 대신 100×(레벨-10)만큼 사거리 내 적에게 피해
+      if(t.level >= def.waveLevel){
+        const burst = 100 * (t.level - def.waveLevel);
+        if(burst > 0){
+          const range = towerStat('awaken', t.level, 'range');
+          for(const e of sim.enemies){
+            const dx=e.px-t.x, dy=e.py-t.y;
+            if(dx*dx+dy*dy <= range*range) e.hp -= burst;
+          }
+        }
+        t.level = def.waveLevel;   // 레벨 10으로 초기화
+        t.lastUpWave = sim.wave;   // 강등 타이머 갱신
+      }
+      pushEvent({t:'wave'});
+      return {ok:true};
+    }
+    // 요새탑 스킬 → 누적 피해량만큼 체력의 벽을 길 위에 생성
+    if(t.type==='fortress'){
+      const def = TOWER_TYPES.fortress;
+      if(t.skillCd>0) return {ok:false, reason:'cd'};
+      const hp = Math.floor(t.stored||0);
+      if(hp < 1) return {ok:false, reason:'none'};
+      // 벽 위치: 요새탑 사거리 안에서 가장 앞선 적의 경로 지점, 없으면 요새탑에서 가장 가까운 경로 지점
+      let wallDist = null, best=-1;
+      const range = towerStat('fortress', t.level, 'range');
+      for(const e of sim.enemies){
+        const dx=e.px-t.x, dy=e.py-t.y;
+        if(dx*dx+dy*dy <= range*range && e.dist>best){ best=e.dist; wallDist=e.dist; }
+      }
+      if(wallDist==null) wallDist = projectToPathDist(t.x, t.y);
+      const p = pathPos(wallDist);
+      t.skillCd = def.skillCd;
+      t.stored = 0;   // 누적 소모
+      sim.walls.push({id:sim.nextWallId++, x:p.x, y:p.y, dist:wallDist, hp:hp, maxHp:hp, life:def.wallLife, owner:t.owner});
+      pushEvent({t:'wallUp', hp});
+      return {ok:true};
+    }
+    return {ok:false, reason:'none'};
   }
   if(action.type==='ready'){
     if(sim.phase!=='prep') return {ok:false, reason:'none'};
-    if(owner==='host') sim.readyHost = true; else sim.readyGuest = true;
+    sim.ready[owner] = true;
     return {ok:true};
   }
   if(action.type==='sell'){
     const idx = sim.towers.findIndex(t=>t.id===action.towerId);
     if(idx<0) return {ok:false, reason:'none'};
-    sim.gold += sellRefund(sim.towers[idx]);
+    const tw = sim.towers[idx];
+    addGold(tw.owner||'host', sellRefund(tw));   // 환급은 설치자에게
     sim.towers.splice(idx,1);
     return {ok:true};
   }
@@ -882,34 +1132,81 @@ function applyInput(action, owner){
   }
   if(action.type==='speed'){
     const v = action.value;
-    if(v===1||v===2||v===3){ gameSpeed = v; return {ok:true}; }
+    if(v===1||v===2||v===3||v===5){ gameSpeed = v; return {ok:true}; }
     return {ok:false, reason:'none'};
   }
   return {ok:false, reason:'none'};
 }
 function findTarget(tower){
   const range = towerStat(tower.type, tower.level, 'range');
-  let best=null, bestX=Infinity;
+  let best=null, bestDist=-1;
   for(const e of sim.enemies){
-    const dx=e.x-tower.x, dy=LANE_Y-tower.y;
-    if(dx*dx+dy*dy <= range*range && e.x<bestX){ bestX=e.x; best=e; }
+    const dx=e.px-tower.x, dy=e.py-tower.y;
+    if(dx*dx+dy*dy <= range*range && e.dist>bestDist){ bestDist=e.dist; best=e; }
   }
   return best;
 }
 function fireTower(tower, target){
   const def = TOWER_TYPES[tower.type];
+  // 각성자 10렙 이상: 기본공격이 에너지파로 대체
+  if(tower.type==='awaken' && tower.level >= def.waveLevel){
+    fireEnergyWave(tower, 1);
+    sim.sfxFire[tower.type] = (sim.sfxFire[tower.type]||0) + 1;
+    if(soundReady && sfxBudget.fire < 4){ sfxBudget.fire++; Snd.play('fire', tower.type); }
+    return;
+  }
   sim.projectiles.push({
     id: sim.nextProjId++, x:tower.x, y:tower.y, targetId:target.id,
     speed: def.speed, dmg: towerStat(tower.type,tower.level,'dmg'),
     splash: def.splash||0, slow: def.slow||0, slowDur: def.slowDur||0,
-    type: def.proj
+    type: def.proj,
+    flameSkill: (tower.type==='flame' && sim.flameSkillT>0),  // 스킬 활성 중 발사한 화염탑 탄
+    srcId: (tower.type==='fortress' ? tower.id : 0)           // 요새탑: 명중 시 피해를 누적할 타워
   });
   sim.sfxFire[tower.type] = (sim.sfxFire[tower.type]||0) + 1;
   if(soundReady && sfxBudget.fire < 4){ sfxBudget.fire++; Snd.play('fire', tower.type); }
 }
+// 각성자 에너지파: 사거리 내 가장 진행한 적 방향으로 관통하는 파동 발사
+function fireEnergyWave(tower, dmgMult){
+  const def = TOWER_TYPES.awaken;
+  const range = towerStat('awaken', tower.level, 'range') * 1.3;
+  // 방향: 사거리 내 가장 앞선 적을 향해, 없으면 기지 방향(왼쪽)
+  let tx=-1, ty=0, best=-1;
+  for(const e of sim.enemies){
+    const dx=e.px-tower.x, dy=e.py-tower.y;
+    if(dx*dx+dy*dy <= range*range && e.dist>best){ best=e.dist; tx=dx; ty=dy; }
+  }
+  const len = Math.hypot(tx,ty)||1;
+  const dmg = towerStat('awaken', tower.level, 'dmg') * def.waveDmgMult * (dmgMult||1);
+  sim.projectiles.push({
+    id: sim.nextProjId++, x:tower.x, y:tower.y,
+    dirx:tx/len, diry:ty/len, speed:520, dmg:dmg,
+    type:'wave', wave:true, width:def.waveWidth,
+    life:range/520 + 0.15, hitIds:{}   // 관통: 이미 맞은 적 재타격 방지
+  });
+}
 function applyHit(proj, target){
-  const dmg = Math.max(1, proj.dmg - (target.armor||0));   // 장갑: 정면 피해 경감(최소 1)
+  let base = proj.dmg;
+  // 화염탑 스킬: 같은 적을 7회 이상 때리면 파란불 → 피해 배수
+  if(proj.flameSkill){
+    target.flameHits = (target.flameHits||0) + 1;
+    if(target.flameHits >= TOWER_TYPES.flame.blueHits) target.blue = true;
+    if(target.blue) base *= TOWER_TYPES.flame.blueMult;
+  }
+  const dmg = Math.max(1, base - (target.armor||0));   // 장갑: 정면 피해 경감(최소 1)
   target.hp -= dmg;
+  // 요새탑: 실제로 입힌 피해를 스킬용 체력으로 누적
+  if(proj.srcId){
+    const src = sim.towers.find(t=>t.id===proj.srcId);
+    if(src) src.stored = (src.stored||0) + dmg;
+  }
+  // 화염탑 스킬: 명중 시 적을 불태움(도트). 파란불이면 도트도 강화.
+  if(proj.flameSkill){
+    const fd = TOWER_TYPES.flame;
+    target.burnT = fd.burnDur;
+    target.burnAcc = target.burnAcc||0;
+    target.burnDmg = fd.burnDmg * (target.blue ? fd.blueMult : 1);
+  }
   if(proj.slow){
     target.slowFactor = Math.min(target.slowFactor, 1-proj.slow);
     target.slowT = Math.max(target.slowT, proj.slowDur);
@@ -917,7 +1214,8 @@ function applyHit(proj, target){
   if(proj.splash>0){
     for(const e of sim.enemies){
       if(e.id===target.id) continue;
-      if(Math.abs(e.x-target.x) <= proj.splash){
+      const dx=e.px-target.px, dy=e.py-target.py;
+      if(dx*dx+dy*dy <= proj.splash*proj.splash){
         const sd = Math.max(1, proj.dmg*0.55 - (e.armor||0));
         e.hp -= sd;
       }
@@ -930,8 +1228,8 @@ function hostTick(dt){
   // ---- 준비 페이즈: 적 없음, 둘 다 준비 완료거나 5분 경과 시 전투 시작 ----
   if(sim.phase==='prep'){
     sim.prepTimer -= dt;
-    const bothReady = sim.readyHost && (!peerId || sim.readyGuest);
-    if(bothReady || sim.prepTimer<=0){
+    const allReady = sim.players.every(pid => sim.ready[pid]);
+    if(allReady || sim.prepTimer<=0){
       sim.phase = 'battle';
       sim.waveTimer = FIRST_PREP;
       pushEvent({t:'battleStart'});
@@ -950,8 +1248,39 @@ function hostTick(dt){
   for(const e of sim.enemies){
     let spd = e.speed;
     if(e.slowT>0){ spd *= e.slowFactor; e.slowT -= dt; if(e.slowT<=0) e.slowFactor=1; }
-    e.x -= spd*dt;
-    if(e.x<=BASE_X){ sim.lives -= e.dmg; e.dead=true; sim.sfxBaseHit++; if(soundReady) Snd.play('baseHit'); }
+    e.dist += spd*dt;
+    const p = pathPos(e.dist);
+    e.px = p.x; e.py = p.y; e.x = p.x;   // x는 하위호환
+    if(e.dist >= PATH_TOTAL){ sim.lives -= e.dmg; e.dead=true; sim.sfxBaseHit++; if(soundReady) Snd.play('baseHit'); }
+  }
+
+  // ---- 요새탑 벽: 길 위에서 적을 막음. 닿으면 그 적 체력만큼 벽 체력이 깎이고 적은 소멸(흡수) ----
+  if(sim.walls.length){
+    const fwd = TOWER_TYPES.fortress;
+    const r2 = fwd.wallR*fwd.wallR;
+    for(const w of sim.walls){
+      w.life -= dt;
+      if(w.hp<=0 || w.life<=0) continue;
+      for(const e of sim.enemies){
+        if(e.dead || w.hp<=0) continue;
+        const dx=e.px-w.x, dy=e.py-w.y;
+        if(dx*dx+dy*dy > r2) continue;
+        // 벽이 남은 체력으로 적을 막음
+        if(w.hp >= e.hp){
+          w.hp -= e.hp;               // 적 체력만큼 벽 소모
+          addGoldBoth(killGold(e.type));  // 흡수한 적도 처치로 간주 → 보상
+          e.hp = 0; e.dead = true;    // 적 소멸
+          sim.sfxKill++;
+        } else {
+          // 벽 체력이 부족하면: 남은 체력만큼 적에게 피해 주고 벽은 파괴
+          e.hp -= w.hp;
+          w.hp = 0;
+          // 벽 지점 직전에서 잠깐 막힘 → 자연스럽게 통과
+          if(e.dist > w.dist){ e.dist = w.dist; const p=pathPos(e.dist); e.px=p.x; e.py=p.y; e.x=p.x; }
+        }
+      }
+    }
+    sim.walls = sim.walls.filter(w=>w.hp>0 && w.life>0);
   }
 
   // ---- 치유형 적: 주변 적을 초당 heal 만큼 회복 (최대체력 한도) ----
@@ -962,29 +1291,55 @@ function hostTick(dt){
       h.healAcc -= 0.5;
       for(const e of sim.enemies){
         if(e.id===h.id) continue;
-        if(Math.abs(e.x-h.x) <= h.healR){ e.hp = Math.min(e.maxHp, e.hp + h.heal*0.5); }
+        const dx=e.px-h.px, dy=e.py-h.py;
+        if(dx*dx+dy*dy <= (h.healR||0)*(h.healR||0)){ e.hp = Math.min(e.maxHp, e.hp + h.heal*0.5); }
       }
     }
   }
 
-  // ---- 불바다(화염탑 스킬): 길 전체, 0.1초마다 최대체력*5% - 5 피해 ----
-  if(sim.fireZones.length){
-    for(const fz of sim.fireZones){
-      fz.until -= dt; fz.tickAcc += dt;
-      while(fz.tickAcc >= TOWER_TYPES.flame.skillTick){
-        fz.tickAcc -= TOWER_TYPES.flame.skillTick;
+  // ---- 화염탑 스킬(30초): 기본공격 강화 지속시간 감소 ----
+  if(sim.flameSkillT>0) sim.flameSkillT = Math.max(0, sim.flameSkillT - dt);
+
+  // ---- 불타는 적: 도트 피해 + 지나간 자리에 불길 남김 ----
+  const fd = TOWER_TYPES.flame;
+  for(const e of sim.enemies){
+    if(e.burnT>0){
+      e.burnT -= dt;
+      e.burnAcc += dt;
+      while(e.burnAcc >= fd.burnTick){
+        e.burnAcc -= fd.burnTick;
+        e.hp -= (e.burnDmg||fd.burnDmg);
+      }
+      // 이동하며 불길 흔적 생성
+      e.trailAcc += dt;
+      if(e.trailAcc >= 0.12){
+        e.trailAcc = 0;
+        sim.fireTrails.push({x:e.px, y:e.py, until:fd.trailDur, tickAcc:0, blue:!!e.blue});
+      }
+      if(e.burnT<=0){ e.burnT=0; e.blue=false; e.flameHits=0; }
+    }
+  }
+
+  // ---- 불길 트레일: 반경 내 적에게 도트, 시간 경과로 소멸 ----
+  if(sim.fireTrails.length){
+    for(const ft of sim.fireTrails){
+      ft.until -= dt; ft.tickAcc += dt;
+      while(ft.tickAcc >= fd.trailTick){
+        ft.tickAcc -= fd.trailTick;
+        const td = fd.trailDmg * (ft.blue ? fd.blueMult : 1);
         for(const e of sim.enemies){
-          const dmg = Math.max(0, e.maxHp*0.05 - 5);
-          e.hp -= dmg;
+          const dx=e.px-ft.x, dy=e.py-ft.y;
+          if(dx*dx+dy*dy <= fd.trailR*fd.trailR) e.hp -= td;
         }
       }
     }
-    sim.fireZones = sim.fireZones.filter(fz=>fz.until>0);
+    if(sim.fireTrails.length>240) sim.fireTrails.splice(0, sim.fireTrails.length-240);
+    sim.fireTrails = sim.fireTrails.filter(ft=>ft.until>0);
   }
 
   sim.enemies = sim.enemies.filter(e=>{
     if(e.dead) return false;
-    if(e.hp<=0){ sim.gold += ENEMY_TYPES[e.type].gold; sim.sfxKill++; if(soundReady && sfxBudget.kill < 4){ sfxBudget.kill++; Snd.play('kill'); } return false; }
+    if(e.hp<=0){ addGoldBoth(killGold(e.type)); sim.sfxKill++; if(soundReady && sfxBudget.kill < 4){ sfxBudget.kill++; Snd.play('kill'); } return false; }
     return true;
   });
 
@@ -999,14 +1354,42 @@ function hostTick(dt){
     t.cd -= dt;
     if(t.cd<=0){
       const target = findTarget(t);
-      if(target){ fireTower(t, target); t.cd = towerStat(t.type,t.level,'rate'); }
+      if(target){
+        fireTower(t, target);
+        let rate = towerStat(t.type,t.level,'rate');
+        // 궁수: 같은 적을 연속으로 때리면 공격당 공속 1%씩 상승(최대 -80%). 대상 바뀌면 초기화.
+        if(t.type==='archer'){
+          if(t.lastTargetId===target.id) t.atkStack = Math.min((t.atkStack||0)+1, 80);
+          else t.atkStack = 0;
+          t.lastTargetId = target.id;
+          rate *= (1 - t.atkStack*0.01);
+        }
+        t.cd = rate;
+      }
     }
   }
 
   for(const p of sim.projectiles){
+    if(p.wave){
+      // 에너지파: 방향으로 직진, 관통, 폭 내 모든 적에게 1회씩 피해
+      p.x += p.dirx*p.speed*dt;
+      p.y += p.diry*p.speed*dt;
+      p.life -= dt;
+      const w2 = (p.width*0.5)*(p.width*0.5);
+      for(const e of sim.enemies){
+        if(p.hitIds[e.id]) continue;
+        const dx=e.px-p.x, dy=e.py-p.y;
+        if(dx*dx+dy*dy <= w2){
+          e.hp -= Math.max(1, p.dmg - (e.armor||0));
+          p.hitIds[e.id] = 1;
+        }
+      }
+      if(p.life<=0) p.dead=true;
+      continue;
+    }
     const target = sim.enemies.find(e=>e.id===p.targetId);
     if(!target){ p.dead=true; continue; }
-    const dx=target.x-p.x, dy=LANE_Y-p.y;
+    const dx=target.px-p.x, dy=target.py-p.y;
     const dist=Math.hypot(dx,dy);
     const step=p.speed*dt;
     if(dist<=step){ applyHit(p,target); p.dead=true; }
@@ -1016,10 +1399,10 @@ function hostTick(dt){
 
   if(sim.waveActive && sim.spawnQueue.length===0 && sim.enemies.length===0){
     sim.waveActive = false;
-    let bonus = 22 + sim.wave*5;
-    // 은행탑 수입: income * level 합산
-    for(const t of sim.towers){ if(t.type==='bank') bonus += TOWER_TYPES.bank.income * t.level; }
-    sim.gold += bonus;
+    const bonus = Math.round((22 + sim.wave*8) * (1 + waveTier(sim.wave)*0.4));
+    addGoldBoth(bonus);   // 웨이브 격퇴 보너스는 양쪽 각자 전액
+    // 은행탑 수입: 각 은행 설치자에게 income*level 지급
+    for(const t of sim.towers){ if(t.type==='bank') addGold(t.owner||'host', TOWER_TYPES.bank.income * t.level); }
     // 각성자 강등: 마지막 업그레이드 후 decayWaves 웨이브 경과 시 -1레벨 (최소 1)
     let decayed = false;
     for(const t of sim.towers){
@@ -1036,13 +1419,19 @@ function hostTick(dt){
 }
 function buildSnapshot(){
   return {
-    g: Math.round(sim.gold), l: sim.lives, w: sim.wave,
-    ph: sim.phase, pt: Math.round(Math.max(0,sim.prepTimer)), rh: sim.readyHost?1:0, rg: sim.readyGuest?1:0,
+    gm: sim.golds,                // pid별 골드 맵 (게스트는 자기 것 조회)
+    pl: sim.players,              // 플레이어 pid 목록
+    rm: sim.ready,                // pid별 준비 상태
+    l: sim.lives, w: sim.wave,
+    ph: sim.phase, pt: Math.round(Math.max(0,sim.prepTimer)),
     wa: sim.waveActive?1:0, wt: Math.round(Math.max(0,sim.waveTimer)*10)/10,
-    e: sim.enemies.map(e=>[e.id,e.type,Math.round(e.x),e.hp,e.maxHp]),
-    t: sim.towers.map(t=>[t.id,Math.round(t.x),Math.round(t.y),t.type,t.level,t.owner,t.invested,Math.round((t.skillCd||0)*10)/10]),
+    e: sim.enemies.map(e=>[e.id,e.type,Math.round(e.px),e.hp,e.maxHp,Math.round(e.py)]),
+    t: sim.towers.map(t=>[t.id,Math.round(t.x),Math.round(t.y),t.type,t.level,t.owner,t.invested,Math.round((t.skillCd||0)*10)/10,Math.round(t.stored||0)]),
+    wl: sim.walls.map(w=>[Math.round(w.x),Math.round(w.y),Math.round(w.hp),Math.round(w.maxHp),Math.round(w.life*10)/10]),
+    lo: sim.loadout || loadout,
     p: sim.projectiles.map(p=>[Math.round(p.x),Math.round(p.y),p.type]),
-    fz: sim.fireZones.length ? 1 : 0,
+    fz: sim.flameSkillT>0 ? 1 : 0,
+    ft: sim.fireTrails.map(f=>[Math.round(f.x),Math.round(f.y),f.blue?1:0]),
     ev: sim.pendingEvents,
     sp: gameSpeed,
     sf: sim.sfxFire, sk: sim.sfxKill, sb: sim.sfxBaseHit,
@@ -1052,28 +1441,37 @@ function buildSnapshot(){
 
 /* ---------------- 게스트: 스냅샷 반영 ---------------- */
 function onNetSync(data){
-  guestState = {gold:data.g, lives:data.l, wave:data.w, waveActive:!!data.wa, waveTimer:data.wt, gameOver:!!data.go,
-    phase:data.ph||'battle', prepTimer:data.pt||0, readyHost:!!data.rh, readyGuest:!!data.rg, fireActive:!!data.fz};
-  if(data.sp===1||data.sp===2||data.sp===3){ gameSpeed = data.sp; updateSpeedBtn(); }
+  const myGold = data.gm ? (data.gm[myPid]||0) : (data.g||0);
+  const myReady = data.rm ? !!data.rm[myPid] : false;
+  guestState = {gold:myGold, lives:data.l, wave:data.w, waveActive:!!data.wa, waveTimer:data.wt, gameOver:!!data.go,
+    phase:data.ph||'battle', prepTimer:data.pt||0, myReady:myReady, fireActive:!!data.fz,
+    golds:data.gm||{}, players:data.pl||[], readyMap:data.rm||{}};
+  if(data.sp===1||data.sp===2||data.sp===3||data.sp===5){ gameSpeed = data.sp; updateSpeedBtn(); }
 
   const seen = new Set();
   for(const tup of data.e){
-    const [id,type,x,hp,maxHp] = tup;
+    const [id,type,x,hp,maxHp,py] = tup;
     seen.add(id);
     let en = guestEnemies[id];
-    if(!en) guestEnemies[id] = {type, x, rx:x, hp, maxHp};
-    else { en.x=x; en.hp=hp; en.maxHp=maxHp; en.type=type; }
+    if(!en) guestEnemies[id] = {type, x, px:x, py:py, ry:py, hp, maxHp};
+    else { en.x=x; en.px=x; en.py=py; en.hp=hp; en.maxHp=maxHp; en.type=type; }
   }
   for(const idStr of Object.keys(guestEnemies)){
     if(!seen.has(Number(idStr))) delete guestEnemies[idStr];
   }
 
-  guestTowers = data.t.map(tup=>({id:tup[0], x:tup[1], y:tup[2], type:tup[3], level:tup[4], owner:tup[5], invested:tup[6], skillCd:tup[7]||0}));
+  guestTowers = data.t.map(tup=>({id:tup[0], x:tup[1], y:tup[2], type:tup[3], level:tup[4], owner:tup[5], invested:tup[6], skillCd:tup[7]||0, stored:tup[8]||0}));
+  guestWalls = (data.wl||[]).map(tup=>({x:tup[0], y:tup[1], hp:tup[2], maxHp:tup[3], life:tup[4]}));
+  if(Array.isArray(data.lo) && data.lo.length){
+    const changed = data.lo.length!==loadout.length || data.lo.some((x,i)=>x!==loadout[i]);
+    if(changed) applyLoadout(data.lo);
+  }
   for(const gid of Object.keys(ghosts)){
     const g = ghosts[gid];
     if(guestTowers.some(tw=>Math.abs(tw.x-g.x)<10 && Math.abs(tw.y-g.y)<10)) delete ghosts[gid];
   }
   guestProjectiles = data.p.map(tup=>({x:tup[0], y:tup[1], type:tup[2]}));
+  guestFireTrails = (data.ft||[]).map(tup=>({x:tup[0], y:tup[1], blue:!!tup[2]}));
 
   // 게스트 전투 사운드 (집계 기반, 과하지 않게 소량만)
   if(soundReady){
@@ -1094,22 +1492,43 @@ function tickGuestInterp(dt){
   for(const id in guestEnemies){
     const e = guestEnemies[id];
     e.rx += (e.x - e.rx)*f;
+    e.ry += (e.py - (e.ry!=null?e.ry:e.py))*f;
+    if(e.ry==null) e.ry = e.py;
   }
 }
 
 /* ---------------- 헬퍼: 호스트/게스트 공용 조회 ---------------- */
-function gold(){ return isHost ? sim.gold : (guestState ? guestState.gold : 0); }
+function gold(){ return isHost ? (sim?(sim.golds[myPid]||0):0) : (guestState ? guestState.gold : 0); }
 function lives(){ return isHost ? sim.lives : (guestState ? guestState.lives : 0); }
 function waveNum(){ return isHost ? sim.wave : (guestState ? guestState.wave : 0); }
 function waveActiveNow(){ return isHost ? sim.waveActive : (guestState ? guestState.waveActive : false); }
 function waveTimerNow(){ return isHost ? sim.waveTimer : (guestState ? guestState.waveTimer : 0); }
 function phaseNow(){ return isHost ? (sim?sim.phase:'prep') : (guestState ? guestState.phase : 'prep'); }
 function prepTimerNow(){ return isHost ? (sim?sim.prepTimer:0) : (guestState ? guestState.prepTimer : 0); }
-function iAmReady(){ if(isHost) return sim&&sim.readyHost; return guestState && guestState.readyGuest; }
-function fireActiveNow(){ return isHost ? (sim&&sim.fireZones.length>0) : (guestState && guestState.fireActive); }
+function iAmReady(){ if(isHost) return !!(sim && sim.ready[myPid]); return !!(guestState && guestState.myReady); }
+function fireActiveNow(){ return isHost ? (sim&&sim.flameSkillT>0) : (guestState && guestState.fireActive); }
+function getRenderTrails(){ return isHost ? (sim?sim.fireTrails:[]) : guestFireTrails; }
+function getRenderWalls(){ return isHost ? (sim?sim.walls:[]) : guestWalls; }
+// pid 목록(게임 중): 호스트는 sim.players, 게스트는 스냅샷 players
+function playerIds(){ return isHost ? (sim?sim.players:[]) : (guestState?guestState.players:[]) || []; }
+// pid → 표시 이름 (로스터 기준, 없으면 방장/플레이어N)
+function pidName(pid){
+  const r = roster.find(p=>p.pid===pid);
+  if(r) return r.name + (r.host?' (방장)':'');
+  if(pid==='host') return '방장';
+  return '플레이어';
+}
+// 4인 색상 팔레트 (설치자 구분용)
+const PLAYER_COLORS = ['#4fc3d9','#e0574a','#7fd06a','#e8b13d'];
+function pidColor(pid){
+  const ids = playerIds();
+  let i = ids.indexOf(pid);
+  if(i<0) i = (pid==='host'?0:1);
+  return PLAYER_COLORS[i % PLAYER_COLORS.length];
+}
 function getRenderEnemies(){
-  if(isHost) return sim.enemies.map(e=>({type:e.type, x:e.x, hp:e.hp, maxHp:e.maxHp}));
-  return Object.values(guestEnemies).map(e=>({type:e.type, x:e.rx, hp:e.hp, maxHp:e.maxHp}));
+  if(isHost) return sim.enemies.map(e=>({type:e.type, px:e.px, py:e.py, x:e.x, hp:e.hp, maxHp:e.maxHp}));
+  return Object.values(guestEnemies).map(e=>({type:e.type, px:e.rx, py:(e.ry!=null?e.ry:e.py), x:e.rx, hp:e.hp, maxHp:e.maxHp}));
 }
 function getRenderTowers(){ return isHost ? sim.towers : guestTowers; }
 function getRenderProjectiles(){ return isHost ? sim.projectiles : guestProjectiles; }
@@ -1139,8 +1558,10 @@ function showBanner(evt){
   if(evt.t==='waveStart'){ title=(evt.boss?'⚠️ 보스 웨이브 ':'웨이브 ')+evt.wave; sub=evt.boss?'거대한 적이 몰려온다!':evt.count+'마리가 몰려온다'; if(soundReady) Snd.play('waveStart'); }
   else if(evt.t==='waveClear'){ title='웨이브 '+evt.wave+' 격퇴!'; sub='+'+evt.bonus+' 골드'; if(soundReady) Snd.play('waveClear'); }
   else if(evt.t==='battleStart'){ title='전투 시작!'; sub='첫 웨이브가 곧 몰려온다'; if(soundReady) Snd.play('waveStart'); }
-  else if(evt.t==='skill'){ title='🔥 화염 폭풍'; sub='길 전체가 불바다에 휩싸인다'; if(soundReady) Snd.play('fire','cannon'); }
+  else if(evt.t==='skill'){ title='🔥 업화 각인'; sub='30초간 공격이 적을 불태우고 불길을 남긴다'; if(soundReady) Snd.play('fire','cannon'); }
+  else if(evt.t==='wave'){ title='✦ 에너지파'; sub='관통하는 파동이 적을 꿰뚫는다'; if(soundReady) Snd.play('fire','mage'); }
   else if(evt.t==='decay'){ title='각성자 약화'; sub='업그레이드를 하지 않아 힘이 빠졌다'; if(soundReady) Snd.play('sell'); }
+  else if(evt.t==='wallUp'){ title='🛡 성벽 소환'; sub='체력 '+evt.hp+'의 벽이 길을 막는다'; if(soundReady) Snd.play('place'); }
   else if(evt.t==='gameOver'){ title='기지 함락'; sub='웨이브 '+evt.wave+'에서 무너졌다'; if(soundReady){ Snd.stopBgm(); Snd.play('gameOver'); } }
   else return;
   typewrite(eventTxt, title);
@@ -1154,8 +1575,9 @@ function showBanner(evt){
 /* ---------------- 타워바 / 정보 팝업 ---------------- */
 function buildTowerBar(){
   let html='';
-  for(const key of TOWER_ORDER){
+  for(const key of loadout){
     const d = TOWER_TYPES[key];
+    if(!d) continue;
     html += '<button class="towerBtn" data-t="'+key+'">'+
       '<div class="ic shape-'+key+'" style="background:'+d.color+';"></div>'+
       '<div class="nm">'+d.name+'</div><div class="cost">'+d.cost+'</div></button>';
@@ -1166,35 +1588,68 @@ function buildTowerBar(){
       const t = btn.getAttribute('data-t');
       selectedTowerType = (selectedTowerType===t) ? null : t;
       placePreview = null; rangeShow = null;
+      if(bulkUpOpen){ bulkUpOpen=false; refreshUpPanel(); }   // 설치 모드 진입 시 일괄UP 해제
       refreshTowerBarSel();
     };
   });
   buildUpPanel();
 }
 function buildUpPanel(){
-  let html = '<button class="upToggle" id="upToggleBtn">일괄<br>UP</button>';
-  html += '<div class="upList" id="upList">';
-  for(const key of TOWER_ORDER){
-    const d = TOWER_TYPES[key];
-    html += '<button class="upBtn" data-u="'+key+'">'+
-      '<div class="ui shape-'+key+'" style="background:'+d.color+';"></div>'+
-      '<div class="uc" data-uc="'+key+'"></div></button>';
-  }
-  html += '</div>';
-  upPanel.innerHTML = html;
+  upPanel.innerHTML = '<button class="upToggle" id="upToggleBtn">일괄<br>UP</button>';
   $('upToggleBtn').onclick = ()=>{
     bulkUpOpen = !bulkUpOpen;
+    if(bulkUpOpen){ closeInfoPopup(); selectedTowerType=null; placePreview=null; refreshTowerBarSel(); }
     refreshUpPanel();
   };
-  upPanel.querySelectorAll('.upBtn').forEach((btn)=>{
+}
+/* ---------------- 유닛 편성 (준비 페이즈 전용) ---------------- */
+function toggleLoadoutDrawer(){
+  if(phaseNow()!=='prep'){ toast('편성은 준비 시간에만 바꿀 수 있어요'); return; }
+  loadoutEditOpen = !loadoutEditOpen;
+  if(loadoutEditOpen) renderLoadoutDrawer();
+  else loadoutDrawer.classList.add('hidden');
+}
+function renderLoadoutDrawer(){
+  let html = '<div class="lh"><span>유닛 편성 · '+loadout.length+'/'+LOADOUT_MAX+'</span><button class="lx" id="loClose">✕</button></div><div class="lgrid">';
+  for(const key of TOWER_ORDER_ALL){
+    const d = TOWER_TYPES[key];
+    const on = loadout.includes(key);
+    html += '<button class="loBtn'+(on?' on':'')+'" data-t="'+key+'">'+
+      '<div class="ic shape-'+key+'" style="background:'+d.color+';"></div>'+
+      '<div class="nm">'+d.name+'</div></button>';
+  }
+  html += '</div><div class="lhint">최대 '+LOADOUT_MAX+'종까지 장착할 수 있어요. 한 개를 빼야 새 유닛을 넣을 수 있습니다. 준비 시간에만 변경 가능.</div>';
+  loadoutDrawer.innerHTML = html;
+  loadoutDrawer.classList.remove('hidden');
+  $('loClose').onclick = ()=>{ loadoutEditOpen=false; loadoutDrawer.classList.add('hidden'); };
+  loadoutDrawer.querySelectorAll('.loBtn').forEach(btn=>{
     btn.onclick = ()=>{
-      const kind = btn.getAttribute('data-u');
-      submitAction({type:'bulkUp', towerType:kind});
-      if(soundReady) Snd.play('upgrade');
-      bulkUpOpen = false;   // 선택 후 목록 닫힘
-      refreshUpPanel();
+      const t = btn.getAttribute('data-t');
+      const has = loadout.includes(t);
+      let next = loadout.slice();
+      if(has){
+        if(next.length<=1){ toast('최소 1종은 남겨야 해요'); return; }
+        next = next.filter(x=>x!==t);
+      } else {
+        if(next.length>=LOADOUT_MAX){ toast('최대 '+LOADOUT_MAX+'종까지만 장착할 수 있어요'); return; }
+        next.push(t);
+      }
+      submitAction({type:'loadout', list:next});
+      if(!isHost) applyLoadout(next);   // 게스트: 즉시 반영(스냅샷으로 확정 동기화)
+      if(soundReady) Snd.play('place');
     };
   });
+}
+// 편성 변경을 로컬에 반영하고 UI 갱신 (호스트 적용 또는 스냅샷 수신 시 호출)
+function applyLoadout(list){
+  if(!Array.isArray(list) || !list.length) return;
+  const clean = list.filter(x=>TOWER_TYPES[x]).slice(0, LOADOUT_MAX);
+  if(!clean.length) return;
+  loadout = clean;
+  if(selectedTowerType && !loadout.includes(selectedTowerType)){ selectedTowerType=null; placePreview=null; rangeShow=null; }
+  buildTowerBar();
+  refreshTowerBarSel();
+  if(loadoutEditOpen) renderLoadoutDrawer();
 }
 function refreshTowerBarSel(){
   towerBarEl.querySelectorAll('.towerBtn').forEach((btn)=>{
@@ -1204,25 +1659,9 @@ function refreshTowerBarSel(){
   });
 }
 function refreshUpPanel(){
-  const toggle = $('upToggleBtn'), list = $('upList');
-  if(!toggle || !list) return;
+  const toggle = $('upToggleBtn');
+  if(!toggle) return;
   toggle.classList.toggle('active', bulkUpOpen);
-  list.classList.toggle('open', bulkUpOpen);
-  if(!bulkUpOpen) return;   // 닫혀 있으면 종류 버튼 갱신 불필요
-  // 종류별 보유/일괄업 비용 계산 → 보유 안 한 종류는 숨김, 골드 부족이면 흐리게
-  const towers = getRenderTowers();
-  upPanel.querySelectorAll('.upBtn').forEach((btn)=>{
-    const kind = btn.getAttribute('data-u');
-    const inf = TOWER_TYPES[kind].infinite;
-    const targets = towers.filter(t=>t.type===kind && (inf || t.level<MAX_LEVEL));
-    const uc = btn.querySelector('[data-uc="'+kind+'"]');
-    if(!towers.some(t=>t.type===kind)){ btn.classList.add('none'); return; }
-    btn.classList.remove('none');
-    if(!targets.length){ btn.classList.add('poor'); if(uc) uc.textContent='MAX'; return; }
-    let cost=0; for(const t of targets) cost += upgradeCost(t.type, t.level);
-    if(uc) uc.textContent = cost;
-    btn.classList.toggle('poor', gold() < upgradeCost(targets[0].type, targets[0].level));
-  });
 }
 function addGhost(id, x, y, type){ ghosts[id] = {x, y, type, t: performance.now()}; }
 function openInfoPopup(tower){
@@ -1245,17 +1684,35 @@ function renderInfoPopup(){
     const cd = tower.skillCd||0;
     html += '<button class="skillMini'+(cd>0?' cool':'')+'" id="popSkill">🔥'+(cd>0?'<span>'+Math.ceil(cd)+'</span>':'')+'</button>';
   }
+  // 각성자 5렙: 에너지파 스킬 버튼
+  if(tower.type==='awaken' && lvl>=def.skillLevel){
+    const cd = tower.skillCd||0;
+    html += '<button class="skillMini'+(cd>0?' cool':'')+'" id="popSkill">✦'+(cd>0?'<span>'+Math.ceil(cd)+'</span>':'')+'</button>';
+  }
+  // 요새탑: 누적 피해로 벽 생성 스킬 버튼 (누적이 있고 쿨이 아닐 때 활성)
+  if(tower.type==='fortress'){
+    const cd = tower.skillCd||0;
+    const ready = cd<=0 && (tower.stored||0)>=1;
+    html += '<button class="skillMini'+(ready?'':' cool')+'" id="popSkill">🛡'+(cd>0?'<span>'+Math.ceil(cd)+'</span>':'')+'</button>';
+  }
   html += '<button class="x" id="popX">✕</button></div>';
 
   // 종류별 실시간 스탯
   html += '<div class="stats">';
   if(tower.type==='bank'){
     html += statRow('웨이브 수입', '+'+(def.income*lvl)+' 골드');
+  } else if(tower.type==='fortress'){
+    html += statRow('공격력', Math.round(towerStat(tower.type,lvl,'dmg')));
+    html += statRow('사거리', Math.round(towerStat(tower.type,lvl,'range')));
+    html += statRow('연사(초)', towerStat(tower.type,lvl,'rate').toFixed(2));
+    html += statRow('누적 피해', '🛡'+Math.round(tower.stored||0));
+    html += statRow('스킬', '누적 피해=체력 벽 생성('+def.skillCd+'초 쿨)');
   } else if(tower.type==='flame'){
     html += statRow('공격력(도트)', Math.round(towerStat(tower.type,lvl,'dmg')));
     html += statRow('사거리', Math.round(towerStat(tower.type,lvl,'range')));
     html += statRow('연사(초)', towerStat(tower.type,lvl,'rate').toFixed(2));
     if(lvl<MAX_LEVEL) html += statRow('스킬', 'Lv.5에서 해금');
+    else html += statRow('스킬', '30초 화염 강화·불길·파란불');
   } else {
     html += statRow('공격력', Math.round(towerStat(tower.type,lvl,'dmg')));
     html += statRow('사거리', Math.round(towerStat(tower.type,lvl,'range')));
@@ -1270,9 +1727,17 @@ function renderInfoPopup(){
       } else {
         html += statRow('특성', '무한 강화');
       }
+      // 각성자 스킬/에너지파 진행 안내
+      if(tower.type==='awaken'){
+        if(lvl >= def.waveLevel) html += statRow('기본공격', '에너지파(관통)');
+        else html += statRow('에너지파', 'Lv.'+def.waveLevel+'부터 기본공격');
+        if(lvl >= def.skillLevel) html += statRow('스킬', '에너지파 발사('+def.skillCd+'초 쿨)');
+        else html += statRow('스킬', 'Lv.'+def.skillLevel+'에서 해금');
+        if(lvl >= def.waveBonusLevel) html += statRow('추가피해', '+'+((lvl-def.waveBonusLevel+1))+'% (레벨당)');
+      }
     }
   }
-  html += statRow('설치자', tower.owner==='host'?'호스트':'게스트');
+  html += statRow('설치자', pidName(tower.owner));
   html += '</div>';
 
   html += '<div class="row">';
@@ -1291,6 +1756,7 @@ function renderInfoPopup(){
   if(skBtn){
     skBtn.onclick = ()=>{
       if((tower.skillCd||0)>0){ toast('스킬 재사용 대기 중입니다'); return; }
+      if(tower.type==='fortress' && (tower.stored||0)<1){ toast('적을 공격해 피해를 쌓으세요'); return; }
       submitAction({type:'skill', towerId:tower.id});
     };
   }
@@ -1337,24 +1803,65 @@ function draw(){
   drawRangeAndPreview();
   drawTowers();
   drawFireZone();
+  drawWalls();
   drawEnemies();
   drawProjectiles();
   ctx.restore();
 }
+function drawWalls(){
+  const walls = getRenderWalls();
+  if(!walls || !walls.length) return;
+  const fwd = TOWER_TYPES.fortress;
+  const R = fwd.wallR;
+  for(const w of walls){
+    const pct = w.maxHp>0 ? Math.max(0,Math.min(1, w.hp/w.maxHp)) : 0;
+    // 돌벽 블록 (경로를 가로지르는 사각)
+    ctx.fillStyle='#565d6c';
+    ctx.fillRect(w.x-R, w.y-R-2, R*2, R*2+4);
+    ctx.fillStyle='#9aa3b2';
+    ctx.fillRect(w.x-R+3, w.y-R+1, R*2-6, R*2-2);
+    // 흉벽 톱니
+    ctx.fillStyle='#565d6c';
+    for(let i=-R; i<R-2; i+=11){ ctx.fillRect(w.x+i, w.y-R-6, 7, 6); }
+    // 벽돌 이음선
+    ctx.strokeStyle='rgba(0,0,0,.28)'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.moveTo(w.x-R+3, w.y); ctx.lineTo(w.x+R-3, w.y);
+    ctx.moveTo(w.x-6, w.y-R+1); ctx.lineTo(w.x-6, w.y);
+    ctx.moveTo(w.x+8, w.y); ctx.lineTo(w.x+8, w.y+R);
+    ctx.stroke();
+    // 체력바
+    const bw=R*2;
+    ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(w.x-bw/2, w.y-R-14, bw, 5);
+    ctx.fillStyle = pct>0.4 ? '#7fd06a' : '#e0574a';
+    ctx.fillRect(w.x-bw/2, w.y-R-14, bw*pct, 5);
+    ctx.fillStyle='#fff'; ctx.font='900 10px "Black Han Sans",sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(Math.round(w.hp), w.x, w.y+2);
+    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  }
+}
 function drawFireZone(){
-  if(!fireActiveNow()) return;
+  // 불타는 적이 남긴 불길 트레일을 렌더 (호스트/게스트 공용)
+  const trails = getRenderTrails();
+  if(!trails || !trails.length) return;
   const t = performance.now()/120;
-  // 길 전체를 따라 일렁이는 불길
-  for(let x=BASE_X; x<SPAWN_X; x+=26){
-    const h = 20 + Math.sin(x*0.07 + t)*10 + Math.random()*6;
-    const grd = ctx.createLinearGradient(0, LANE_Y-h, 0, LANE_Y+26);
-    grd.addColorStop(0, 'rgba(255,220,80,0)');
-    grd.addColorStop(0.4, 'rgba(255,150,40,0.55)');
-    grd.addColorStop(1, 'rgba(210,50,20,0.75)');
+  for(const ft of trails){
+    const h = 18 + Math.sin(ft.x*0.07 + t)*8 + Math.random()*5;
+    const grd = ctx.createLinearGradient(ft.x, ft.y-h, ft.x, ft.y+14);
+    if(ft.blue){
+      grd.addColorStop(0, 'rgba(180,230,255,0)');
+      grd.addColorStop(0.4, 'rgba(80,160,255,0.55)');
+      grd.addColorStop(1, 'rgba(30,80,220,0.7)');
+    } else {
+      grd.addColorStop(0, 'rgba(255,220,80,0)');
+      grd.addColorStop(0.4, 'rgba(255,150,40,0.55)');
+      grd.addColorStop(1, 'rgba(210,50,20,0.7)');
+    }
     ctx.fillStyle = grd;
     ctx.beginPath();
-    ctx.moveTo(x-14, LANE_Y+26);
-    ctx.quadraticCurveTo(x, LANE_Y-h, x+14, LANE_Y+26);
+    ctx.moveTo(ft.x-11, ft.y+14);
+    ctx.quadraticCurveTo(ft.x, ft.y-h, ft.x+11, ft.y+14);
     ctx.closePath(); ctx.fill();
   }
 }
@@ -1364,40 +1871,53 @@ function drawHills(){
   let n = Math.ceil(WORLD_W/620)+1;
   for(let i=0;i<n;i++){
     const cx = i*620+180;
-    ctx.beginPath(); ctx.ellipse(cx, LANE_Y-30, 340, 200, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx, WORLD_H*0.32, 340, 210, 0, 0, Math.PI*2); ctx.fill();
   }
   ctx.fillStyle='#8fc96f';
   n = Math.ceil(WORLD_W/520)+1;
   for(let i=0;i<n;i++){
     const cx = i*520+330;
-    ctx.beginPath(); ctx.ellipse(cx, LANE_Y+40, 380, 240, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx, WORLD_H*0.66, 380, 250, 0, 0, Math.PI*2); ctx.fill();
   }
 }
 function drawLane(){
-  // 잔디 벌판
+  // 잔디 벌판 전체
   ctx.fillStyle='#79bd58';
-  ctx.fillRect(0, LANE_Y+26, WORLD_W, 4000);
-  // 흙길 (몬스터가 다니는 경로)
-  ctx.fillStyle='#c9a86b';
-  ctx.fillRect(0, LANE_Y-30, WORLD_W, 60);
-  ctx.fillStyle='#b8965a';
-  ctx.fillRect(0, LANE_Y+22, WORLD_W, 8);
-  // 길 가장자리 잔디 라인
-  ctx.fillStyle='#5d9e42';
-  ctx.fillRect(0, LANE_Y-34, WORLD_W, 4);
-  ctx.fillRect(0, LANE_Y+30, WORLD_W, 4);
-  // 길 위 자갈 점묘
-  ctx.fillStyle='rgba(120,90,50,.35)';
-  for(let x=20; x<WORLD_W; x+=53){
-    const yy = LANE_Y - 16 + ((x*7)%40);
-    ctx.fillRect(x%WORLD_W, yy, 4, 3);
+  ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+  ctx.fillStyle='rgba(0,0,0,0.04)';
+  ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+
+  const ROAD = LANE_NOBUILD*0.86;   // 길 반폭
+  // 흙길 본체 (경로 세그먼트를 두꺼운 선으로)
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.strokeStyle='#5d9e42'; ctx.lineWidth=ROAD*2+10;   // 가장자리 진한 잔디 테두리
+  strokePath();
+  ctx.strokeStyle='#c9a86b'; ctx.lineWidth=ROAD*2;      // 흙
+  strokePath();
+  ctx.strokeStyle='#b8965a'; ctx.lineWidth=ROAD*2*0.5;  // 중앙 짙은 흙
+  ctx.globalAlpha=0.5; strokePath(); ctx.globalAlpha=1;
+  // 자갈 점묘
+  ctx.fillStyle='rgba(120,90,50,.30)';
+  let acc=0;
+  for(const s of PATH_SEGS.segs){
+    for(let d=0; d<s.len; d+=46){
+      const px=s.a.x+s.dirx*d, py=s.a.y+s.diry*d;
+      const off=((px+py)%40)-20;
+      ctx.fillRect(px-2 + (s.diry?off:0), py-2 + (s.dirx?off:0), 4, 3);
+    }
   }
+}
+function strokePath(){
+  ctx.beginPath();
+  ctx.moveTo(PATH[0].x, PATH[0].y);
+  for(let i=1;i<PATH.length;i++) ctx.lineTo(PATH[i].x, PATH[i].y);
+  ctx.stroke();
 }
 function drawBaseAndSpawn(){
   const t = performance.now()/1000;
 
   /* ---- 거점: 파랗게 빛나는 무지개 그라데이션 구슬 (HP 표시) ---- */
-  const bx = BASE_X, by = LANE_Y, R = 42;
+  const bx = BASE_X, by = BASE_Y, R = 42;
   const pulse = 1 + Math.sin(t*2)*0.05;
   // 바깥 광채
   const glow = ctx.createRadialGradient(bx, by, R*0.5, bx, by, R*2.4*pulse);
@@ -1435,7 +1955,7 @@ function drawBaseAndSpawn(){
   ctx.textAlign='left'; ctx.textBaseline='alphabetic';
 
   /* ---- 스폰: 검은 안개가 피어오르는 구슬 ---- */
-  const sx = SPAWN_X, sy = LANE_Y, SR = 34;
+  const sx = SPAWN_X, sy = SPAWN_Y, SR = 34;
   for(let i=0;i<5;i++){
     const ph = t*0.7 + i*1.3;
     const fy = sy - 20 - ((ph*26)%80);
@@ -1492,6 +2012,14 @@ function drawTowerShape(x,y,type,level,alpha){
     ctx.fillStyle='#ffd0ec';
     drawStar(x, y, 5, 9, 4);
   }
+  else if(type==='fortress'){
+    // 성채 타워: 원형 몸체 + 흉벽
+    ctx.beginPath(); ctx.arc(x,y,17,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=d.dark;
+    for(let i=-16;i<16;i+=11){ ctx.fillRect(x+i, y-22, 6, 7); }
+    ctx.fillStyle='#c7ccd6';
+    ctx.fillRect(x-4,y-6,8,14);
+  }
   // 레벨 표시: 무한 타워는 숫자, 그 외는 점(최대 5)
   if(TOWER_TYPES[type].infinite){
     ctx.fillStyle=COL_GOLD; ctx.font='900 13px "Black Han Sans",sans-serif';
@@ -1518,16 +2046,14 @@ function drawStar(cx, cy, spikes, outer, inner){
   ctx.closePath(); ctx.fill();
 }
 function drawBuildZones(){
-  // 타워 선택 시에만 설치 가능 구역을 은은하게 강조 (길과 기지/스폰 주변 제외)
-  if(!selectedTowerType) return;
-  const x0 = BASE_X+BASE_MARGIN, w = (SPAWN_X-BASE_MARGIN)-x0;
-  ctx.fillStyle = 'rgba(255,255,255,.10)';
-  ctx.fillRect(x0, BUILD_MARGIN, w, (LANE_Y-LANE_NOBUILD)-BUILD_MARGIN);
-  ctx.fillRect(x0, LANE_Y+LANE_NOBUILD, w, (WORLD_H-BUILD_MARGIN)-(LANE_Y+LANE_NOBUILD));
-  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.setLineDash([10,8]); ctx.lineWidth=2;
-  ctx.strokeRect(x0, BUILD_MARGIN, w, (LANE_Y-LANE_NOBUILD)-BUILD_MARGIN);
-  ctx.strokeRect(x0, LANE_Y+LANE_NOBUILD, w, (WORLD_H-BUILD_MARGIN)-(LANE_Y+LANE_NOBUILD));
-  ctx.setLineDash([]);
+  if(!selectedTowerType && !bulkUpOpen) return;
+  // 설치 가능 필드 은은한 강조
+  ctx.fillStyle = 'rgba(255,255,255,.06)';
+  ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+  // 경로 주변 설치 금지 구역(붉은 띠)
+  ctx.strokeStyle='rgba(224,87,74,.22)'; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.lineWidth=LANE_NOBUILD*2;
+  strokePath();
 }
 function drawRangeAndPreview(){
   // 사거리 범위 원 (설치 예정 위치 또는 선택된 기존 타워)
@@ -1551,9 +2077,16 @@ function drawTowers(){
   for(const t of getRenderTowers()){
     drawTowerShape(t.x, t.y, t.type, t.level, 1);
     if(t.owner){
-      ctx.strokeStyle = t.owner==='host' ? COL_TEAL : COL_CRIMSON;
+      ctx.strokeStyle = pidColor(t.owner);
       ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.arc(t.x, t.y, 30, 0, Math.PI*2); ctx.stroke();
+    }
+    // 요새탑: 누적 피해(스킬 벽 체력) 표시
+    if(t.type==='fortress' && (t.stored||0)>0){
+      ctx.fillStyle=COL_GOLD; ctx.font='900 11px "Black Han Sans",sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('🛡'+Math.round(t.stored), t.x, t.y+26);
+      ctx.textAlign='left'; ctx.textBaseline='alphabetic';
     }
   }
   for(const gid of Object.keys(ghosts)){
@@ -1567,43 +2100,57 @@ function drawEnemies(){
   for(const e of getRenderEnemies()){
     const def = ENEMY_TYPES[e.type];
     const r = def.r;
+    const ex = (e.px!=null?e.px:e.x), ey = (e.py!=null?e.py:LANE_Y);
     // 치유형: 주변 회복 오라
     if(def.heal){
       ctx.fillStyle='rgba(199,125,255,'+(0.10+Math.sin(now*3)*0.05).toFixed(3)+')';
-      ctx.beginPath(); ctx.arc(e.x, LANE_Y, def.healR||100, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ex, ey, def.healR||100, 0, Math.PI*2); ctx.fill();
     }
     // 검은 안개 잔영
     ctx.fillStyle='rgba(20,15,28,.32)';
-    ctx.beginPath(); ctx.arc(e.x+r*0.7, LANE_Y, r*1.15, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex+r*0.7, ey, r*1.15, 0, Math.PI*2); ctx.fill();
     // 몸체
     ctx.fillStyle = def.color;
-    ctx.beginPath(); ctx.arc(e.x, LANE_Y, r, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex, ey, r, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle='rgba(0,0,0,.18)';
-    ctx.beginPath(); ctx.arc(e.x, LANE_Y+r*0.35, r*0.7, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex, ey+r*0.35, r*0.7, 0, Math.PI*2); ctx.fill();
     // 장갑형: 금속 테두리
     if(def.armor){
       ctx.strokeStyle='#cbd2e6'; ctx.lineWidth=3;
-      ctx.beginPath(); ctx.arc(e.x, LANE_Y, r-1, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(ex, ey, r-1, 0, Math.PI*2); ctx.stroke();
     }
     // 보스(brute): 왕관 표식
     if(e.type==='brute'){
       ctx.fillStyle=COL_GOLD;
       ctx.beginPath();
-      ctx.moveTo(e.x-10, LANE_Y-r-4); ctx.lineTo(e.x-10, LANE_Y-r-14); ctx.lineTo(e.x-4, LANE_Y-r-8);
-      ctx.lineTo(e.x, LANE_Y-r-16); ctx.lineTo(e.x+4, LANE_Y-r-8); ctx.lineTo(e.x+10, LANE_Y-r-14);
-      ctx.lineTo(e.x+10, LANE_Y-r-4); ctx.closePath(); ctx.fill();
+      ctx.moveTo(ex-10, ey-r-4); ctx.lineTo(ex-10, ey-r-14); ctx.lineTo(ex-4, ey-r-8);
+      ctx.lineTo(ex, ey-r-16); ctx.lineTo(ex+4, ey-r-8); ctx.lineTo(ex+10, ey-r-14);
+      ctx.lineTo(ex+10, ey-r-4); ctx.closePath(); ctx.fill();
     }
     // 체력바 (보스는 더 넓게)
     const w = e.type==='brute' ? 48 : 28;
-    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(e.x-w/2, LANE_Y-r-11, w, 5);
+    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(ex-w/2, ey-r-11, w, 5);
     ctx.fillStyle=COL_CRIMSON;
     const pct = e.maxHp>0 ? Math.max(0,Math.min(1, e.hp/e.maxHp)) : 0;
-    ctx.fillRect(e.x-w/2, LANE_Y-r-11, w*pct, 5);
+    ctx.fillRect(ex-w/2, ey-r-11, w*pct, 5);
   }
 }
 function drawProjectiles(){
   for(const p of getRenderProjectiles()){
-    ctx.fillStyle = p.type==='shard' ? COL_TEAL : p.type==='bolt' ? '#c98bee' : p.type==='ball' ? '#caa27a' : p.type==='star' ? '#ff5db0' : p.type==='fire' ? '#ff9040' : '#dfe6c9';
+    if(p.type==='wave'){
+      // 에너지파: 빛나는 핑크 파동
+      const rr = 16;
+      const g = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, rr);
+      g.addColorStop(0, 'rgba(255,190,240,0.95)');
+      g.addColorStop(0.5, 'rgba(255,93,176,0.65)');
+      g.addColorStop(1, 'rgba(255,93,176,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2); ctx.stroke();
+      continue;
+    }
+    ctx.fillStyle = p.type==='shard' ? COL_TEAL : p.type==='bolt' ? '#c98bee' : p.type==='ball' ? '#caa27a' : p.type==='star' ? '#ff5db0' : p.type==='fire' ? '#ff9040' : p.type==='rock' ? '#9aa3b2' : '#dfe6c9';
     ctx.beginPath(); ctx.arc(p.x, p.y, p.type==='ball'?6:4, 0, Math.PI*2); ctx.fill();
   }
 }
@@ -1636,8 +2183,23 @@ canvas.addEventListener('pointercancel', ()=>{ ptr.down=false; });
 
 function handleTap(cx,cy,isDouble){
   const [wx,wy] = screenToWorld(cx,cy);
-  // 1) 기존 타워를 눌렀으면 → 범위 표시 + 정보 팝업
   const tower = towerNear(wx,wy,32);
+
+  // 일괄UP 모드: 유닛을 탭하면 그 종류 전체 일괄 업그레이드
+  if(bulkUpOpen){
+    if(tower){
+      submitAction({type:'bulkUp', towerType:tower.type});
+      if(soundReady) Snd.play('upgrade');
+      rangeShow = {x:tower.x, y:tower.y, range:towerStat(tower.type, tower.level, 'range')};
+      toast(TOWER_TYPES[tower.type].name+' 일괄 업그레이드');
+    } else {
+      bulkUpOpen = false; refreshUpPanel();   // 빈 곳 탭 → 일괄UP 모드 해제
+      rangeShow = null;
+    }
+    return;
+  }
+
+  // 1) 기존 타워를 눌렀으면 → 범위 표시 + 정보 팝업
   if(tower){
     placePreview = null;
     rangeShow = {x:tower.x, y:tower.y, range:towerStat(tower.type, tower.level, 'range')};
@@ -1672,7 +2234,8 @@ function handleTap(cx,cy,isDouble){
 
 /* ---------------- 화면 전환 ---------------- */
 function hostStartGame(){
-  sim = newSim();
+  const players = ['host'].concat(Object.keys(peers));   // 현재 접속 인원 고정
+  sim = newSim(players);
   gameOverShown = false;
   selectedTowerType = null; ghosts = {}; placePreview=null; rangeShow=null; closeInfoPopup();
   gameSpeed = 1; updateSpeedBtn();
@@ -1684,10 +2247,10 @@ function hostStartGame(){
   resizeCanvas();
   refreshTowerBarSel();
   if(soundReady) Snd.startBgm();
-  if(peerId && act.start) act.start[0]({});
+  if(hasPeers() && act.start) act.start[0]({});
 }
 function onNetStart(_data){
-  guestState = null; guestEnemies = {}; guestTowers = []; guestProjectiles = [];
+  guestState = null; guestEnemies = {}; guestTowers = []; guestProjectiles = []; guestFireTrails = [];
   gameOverShown = false;
   selectedTowerType = null; ghosts = {}; placePreview=null; rangeShow=null; closeInfoPopup();
   gameSpeed = 1; updateSpeedBtn();
@@ -1727,6 +2290,7 @@ leaveBtn.onclick = ()=>{
   if(confirm('게임을 나가시겠습니까?')){ leaveRoom(); gameScreen.classList.add('hidden'); resetLobbyUI(); }
 };
 skipBtn.onclick = ()=>submitAction({type:'skip'});
+loadoutBtn.onclick = ()=>toggleLoadoutDrawer();
 readyBtn.onclick = ()=>{
   if(phaseNow()!=='prep' || iAmReady()) return;
   submitAction({type:'ready'});
@@ -1743,7 +2307,7 @@ function updateSpeedBtn(){
   speedBtn.classList.toggle('fast', gameSpeed>1);
 }
 speedBtn.onclick = ()=>{
-  const next = gameSpeed>=3 ? 1 : gameSpeed+1;
+  const next = gameSpeed>=5 ? 1 : gameSpeed===3 ? 5 : gameSpeed+1;   // 1→2→3→5→1
   if(isHost){ gameSpeed = next; updateSpeedBtn(); }        // 호스트: 즉시 반영
   else { submitAction({type:'speed', value:next}); }        // 게스트: 호스트에 요청 (스냅샷으로 라벨 동기화)
 };
@@ -1790,9 +2354,18 @@ function updateHud(){
     prepTimeTxt.textContent = Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
     const ready = iAmReady();
     readyBtn.classList.toggle('done', !!ready);
-    readyBtn.textContent = ready ? (peerId ? '상대 대기중' : '시작 중...') : '준비 완료';
+    if(ready){
+      // 준비 완료 후: 남은 인원 표시
+      let total=0, done=0;
+      if(isHost && sim){ total=sim.players.length; done=sim.players.filter(p=>sim.ready[p]).length; }
+      else if(guestState){ total=(guestState.players||[]).length; done=(guestState.players||[]).filter(p=>guestState.readyMap[p]).length; }
+      readyBtn.textContent = (total>1) ? ('대기중 '+done+'/'+total) : '시작 중...';
+    } else {
+      readyBtn.textContent = '준비 완료';
+    }
   } else {
     prepBar.classList.add('hidden');
+    if(loadoutEditOpen){ loadoutEditOpen=false; loadoutDrawer.classList.add('hidden'); }
   }
 
   // 웨이브 타이머 / 즉시소환 (전투 페이즈에서만)
@@ -1844,12 +2417,12 @@ function loop(now){
       const steps = gameSpeed;                 // 1/2/3 배: 동일 dt로 여러 번 틱 → 물리 안정
       for(let s=0; s<steps && !sim.gameOver; s++) hostTick(dt);
       syncAccum += dt*steps;
-      if(peerId && syncAccum>=SYNC_INTERVAL){
+      if(hasPeers() && syncAccum>=SYNC_INTERVAL){
         syncAccum = 0;
         if(act.sync) act.sync[0](buildSnapshot());
         sim.pendingEvents = [];
         sim.sfxFire = {}; sim.sfxKill = 0; sim.sfxBaseHit = 0;
-      } else if(!peerId){
+      } else if(!hasPeers()){
         sim.pendingEvents = [];
         sim.sfxFire = {}; sim.sfxKill = 0; sim.sfxBaseHit = 0;
       }

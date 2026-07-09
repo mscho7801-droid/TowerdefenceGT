@@ -136,6 +136,7 @@ input{font-family:inherit;}
 .ic.shape-bank{border-radius:3px;clip-path:polygon(50% 0%,100% 38%,100% 100%,0% 100%,0% 38%);}
 .ic.shape-awaken{clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);}
 .ic.shape-fortress{border-radius:2px;clip-path:polygon(0% 22%,15% 22%,15% 0%,32% 0%,32% 22%,50% 22%,50% 0%,68% 0%,68% 22%,85% 22%,85% 0%,100% 0%,100% 100%,0% 100%);}
+.ic.shape-summon{border-radius:50% 50% 50% 50%/60% 60% 40% 40%;clip-path:polygon(50% 0%,80% 12%,100% 45%,88% 100%,62% 78%,50% 100%,38% 78%,12% 100%,0% 45%,20% 12%);}
 .towerBtn.edit{border-style:dashed;}
 .towerBtn .rm{position:absolute;top:-6px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--crimson);
   color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;}
@@ -255,7 +256,7 @@ input{font-family:inherit;}
         <input id="joinCodeInput" maxlength="4" placeholder="예: A3K9" autocapitalize="characters" autocomplete="off" spellcheck="false">
       </div>
       <button class="btn btn-gold" id="menuActionBtn">방 만들기</button>
-      <div class="hint" style="margin-top:12px;">최대 4인 협동 · 링크 하나로 초대 · 별도 설치 없음</div>
+      <div class="hint" style="margin-top:12px;">2인 협동 · 링크 하나로 초대 · 별도 설치 없음</div>
     </div>
 
     <div class="card hidden" id="waitPanel">
@@ -445,14 +446,20 @@ const TOWER_TYPES = {
     skillCd:15, skillLevel:5,          // Lv.5부터 스킬(에너지파) 사용 가능
     waveLevel:10, waveBonusLevel:20,   // Lv.10부터 기본공격이 에너지파 / Lv.20부터 레벨당 +1%
     waveWidth:70, waveDmgMult:1.6},    // 에너지파: 관통 폭 / 피해 배수
-  fortress:{name:'요새탑',cost:100,range:120,dmg:16,rate:0.8,proj:'rock',speed:380,color:'#9aa3b2',dark:'#565d6c',
-    skillCd:12,                 // 스킬: 누적시킨 피해량만큼 체력의 벽을 길 위에 생성
-    wallLife:16, wallR:24}      // 벽 지속시간(초) / 접촉 반경
+  fortress:{name:'요새탑',cost:100,range:0,dmg:0,rate:99,proj:'none',speed:1,color:'#9aa3b2',dark:'#565d6c',
+    wall:true, contactDmg:14, wallR:26},   // 길 위에 벽 설치: 접촉 시 contactDmg*level, 입힌 피해만큼 체력 상승
+  summon:{name:'소환탑',cost:130,range:0,dmg:0,rate:99,proj:'none',speed:1,color:'#57c9d1',dark:'#256a70',
+    summon:true, skillLevel:5,            // 일정 시간마다 아군 괴물 소환, Lv.5에 융합 스킬 해금
+    baseInterval:6.0, intervalStep:0.55,  // 소환 간격: baseInterval - (level-1)*intervalStep (하한 있음)
+    minHp:60, hpPerLv:55,                 // 소환수 체력: minHp + (level-1)*hpPerLv
+    minDmg:14, dmgPerLv:11,               // 소환수 접촉피해(초당): minDmg + (level-1)*dmgPerLv
+    minSpeed:70, minR:15,                 // 소환수 이동속도 / 반경
+    skillCd:120}                          // Lv.5 융합 스킬 재사용 대기시간 (2분)
 };
 // 전체 유닛 종류(편성 후보). 실제 타워바에는 편성된 7종만 노출.
-const TOWER_ORDER_ALL = ['archer','cannon','frost','mage','flame','bank','awaken','fortress'];
+const TOWER_ORDER_ALL = ['archer','cannon','frost','mage','flame','bank','awaken','fortress','summon'];
 const LOADOUT_MAX = 7;   // 동시에 장착 가능한 유닛 종류 수
-const DEFAULT_LOADOUT = ['archer','cannon','frost','mage','flame','bank','awaken'];
+const DEFAULT_LOADOUT = ['archer','cannon','frost','mage','flame','summon','awaken'];
 let loadout = DEFAULT_LOADOUT.slice();   // 현재 편성된 유닛 종류 (호스트 권위, 스냅샷 동기화)
 let loadoutEditOpen = false;
 
@@ -477,6 +484,15 @@ function isBuildableSpot(x,y){
   if(Math.hypot(x-BASE_X, y-BASE_Y) < BASE_MARGIN+20) return false;
   return true;
 }
+// 요새탑(벽): 길 위에만 설치. 경로 중심에서 가까운 곳, 기지/스폰 포탈은 제외
+const WALL_ONPATH = 40;   // 경로 중심선에서 이 거리 이내면 '길 위'로 간주
+function isWallSpot(x,y){
+  if(x < 60 || x > WORLD_W-60) return false;
+  if(distToPath(x,y) > WALL_ONPATH) return false;
+  if(Math.hypot(x-SPAWN_X, y-SPAWN_Y) < BASE_MARGIN+20) return false;
+  if(Math.hypot(x-BASE_X, y-BASE_Y) < BASE_MARGIN+20) return false;
+  return true;
+}
 
 /* ---------------- DOM ---------------- */
 const $ = (id) => document.getElementById(id);
@@ -497,15 +513,11 @@ let bulkUpOpen = false;   // '일괄UP' 버튼으로 종류 선택 목록이 펼
 const finalWaveTxt = $('finalWave'), retryBtn = $('retryBtn'), exitBtn = $('exitBtn');
 
 /* ---------------- 상태 ---------------- */
-const MAX_PLAYERS = 4;         // 방 최대 인원 (방장 포함)
 let mode = 'host';            // 'host' | 'join' (로비 탭)
 let currentScreen = 'lobby';  // 'lobby' | 'game'
 let roomCode = '';
-let myName = '';
-let myPid = null;              // 내 고유 플레이어 ID ('host' 또는 랜덤). 모든 입력에 실려 감
-let isHost = false, netMod = null, room = null;
-let peers = {};                // 호스트: 접속한 게스트 pid -> {name}  (게스트에선 미사용)
-let roster = [];               // [{pid,name,host}] 방장이 관리·브로드캐스트하는 참가자 명단
+let myName = '', peerName = '';
+let isHost = false, netMod = null, room = null, peerId = null;
 const act = {};                // trystero 액션 [send,get] 모음
 let inputSeq = 1;
 const pendingActions = {};     // id -> action (게스트: 낙관적 UI 정리용)
@@ -516,12 +528,9 @@ let guestEnemies = {};         // 게스트: id -> {type,x,rx,hp,maxHp}
 let guestTowers = [];
 let guestProjectiles = [];
 let guestFireTrails = [];      // 게스트: 불길 트레일 [{x,y,blue}]
-let guestWalls = [];           // 게스트: 요새탑 벽 [{x,y,hp,maxHp,life}]
+let guestMinions = {};         // 게스트: id -> {x,rx,py,ry,hp,maxHp,fused,r} 아군 소환수
 let syncAccum = 0;
 let gameOverShown = false;
-// 접속한 게스트가 하나라도 있는지 (동기화 전송 게이트)
-function hasPeers(){ return Object.keys(peers).length>0; }
-function playerCount(){ return isHost ? (1 + Object.keys(peers).length) : roster.length || 2; }
 
 let selectedTowerType = null;
 let ghosts = {};               // actionId -> {x,y,type,t} (설치 요청 낙관적 표시)
@@ -678,90 +687,57 @@ function mkAction(r, name){
   return [a.send || a[0], a.onMessage || a.get || a[1]];
 }
 function setupActions(){
-  act.lobby = mkAction(room,'lobby');     // 게스트→호스트: 참가 알림 {pid,name}
-  act.roster= mkAction(room,'roster');    // 호스트→전체: 참가자 명단 브로드캐스트
+  act.lobby = mkAction(room,'lobby');
   act.start = mkAction(room,'start');
   act.sync  = mkAction(room,'sync');
-  act.input = mkAction(room,'input');      // 게스트→호스트: {from,pid,...action}
-  act.inres = mkAction(room,'inres');      // 호스트→전체: {to,id,ok,reason}
-  act.leave = mkAction(room,'leave');      // 게스트→호스트: {pid}
+  act.input = mkAction(room,'input');
+  act.inres = mkAction(room,'inres');
+  act.leave = mkAction(room,'leave');
 
-  act.lobby[1]((data)=>{
-    if(!isHost || !data || !data.pid) return;
-    // 정원 초과 시 무시 (방장 포함 MAX_PLAYERS)
-    if(!peers[data.pid] && (1+Object.keys(peers).length) >= MAX_PLAYERS){ return; }
-    peers[data.pid] = {name: (data.name||'플레이어')};
-    rebuildRoster();
-    broadcastRoster();
-    if(currentScreen==='lobby') renderWaitPanel();
-  });
-  act.roster[1]((data)=>{
-    if(isHost) return;
-    roster = (data && Array.isArray(data.list)) ? data.list : roster;
-    if(currentScreen==='lobby') renderWaitPanel();
-  });
+  act.lobby[1]((data)=>{ peerName = (data && data.name) || '플레이어'; if(currentScreen==='lobby') renderWaitPanel(); });
   act.start[1]((data)=>{ onNetStart(data); });
   act.sync[1]((data)=>{ onNetSync(data); });
   act.input[1]((data)=>{
     if(isHost){
-      const pid = data && data.from ? data.from : 'guest';
-      const res = applyInput(data, pid);
-      act.inres[0]({to:pid, id:data.id, ok:res.ok, reason:res.reason});
+      const res = applyInput(data, 'guest');
+      act.inres[0]({id:data.id, ok:res.ok, reason:res.reason});
     }
   });
   act.inres[1]((data)=>{
-    if(isHost) return;
-    if(data.to && data.to!==myPid) return;   // 나에게 온 응답만 처리
     delete pendingActions[data.id];
     delete ghosts[data.id];
     if(!data.ok) toast(errText(data.reason));
   });
-  act.leave[1]((data)=>{
-    if(isHost && data && data.pid){ delete peers[data.pid]; rebuildRoster(); broadcastRoster(); }
-    onPeerGone();
-  });
+  act.leave[1]((_data)=>{ onPeerGone(); });
 
   if(typeof room.onPeerJoin==='function'){
     room.onPeerJoin((pid)=>{
+      peerId = pid;
       hideConnBanner();
-      // 게스트: 방장에게 내 참가 정보 전송 / 방장: 명단 재전송
-      if(!isHost){ act.lobby[0]({pid:myPid, name:myName}); }
-      else { broadcastRoster(); }
+      act.lobby[0]({name: myName});
       if(currentScreen==='lobby') renderWaitPanel();
     });
   }
   if(typeof room.onPeerLeave==='function'){
-    room.onPeerLeave((_pid)=>{
-      // Trystero peerId와 우리 pid 매핑이 없으므로, 명단 정합은 leave 액션으로 처리.
-      if(currentScreen==='game') showConnBanner();
-      if(currentScreen==='lobby') renderWaitPanel();
-    });
+    room.onPeerLeave((_pid)=>{ onPeerGone(); });
   }
 }
-// 호스트: peers로 roster 재구성 (방장 먼저)
-function rebuildRoster(){
-  roster = [{pid:'host', name:myName, host:true}];
-  for(const pid of Object.keys(peers)) roster.push({pid, name:peers[pid].name, host:false});
-}
-function broadcastRoster(){ if(isHost && act.roster) act.roster[0]({list:roster}); }
 function onPeerGone(){
+  peerId = null;
   if(currentScreen==='game') showConnBanner();
   if(currentScreen==='lobby') renderWaitPanel();
 }
 async function connectRoom(code, asHost){
   isHost = asHost;
-  myPid = asHost ? 'host' : ('p'+Math.random().toString(36).slice(2,9));
   roomCode = code;
-  peers = {};
-  roster = asHost ? [{pid:'host', name:myName, host:true}] : [];
   if(!netMod) netMod = await loadTrystero();
   room = netMod.joinRoom({appId:APP_ID, relayUrls:TRY_RELAYS, relayRedundancy:TRY_RELAYS.length}, 'TD-'+code);
   setupActions();
 }
 function leaveRoom(){
-  try{ if(room && act.leave && !isHost) act.leave[0]({pid:myPid}); }catch(e){}
+  try{ if(room && act.leave) act.leave[0]({}); }catch(e){}
   try{ if(room && typeof room.leave==='function') room.leave(); }catch(e){}
-  room = null; peers = {}; roster = []; sim = null; guestState = null;
+  room = null; peerId = null; sim = null; guestState = null;
   Snd.stopBgm();
 }
 function submitAction(action){
@@ -770,7 +746,6 @@ function submitAction(action){
     if(!res.ok) toast(errText(res.reason));
   } else {
     action.id = 'i'+(inputSeq++);
-    action.from = myPid;
     if(action.type==='place') addGhost(action.id, action.x, action.y, action.towerType);
     pendingActions[action.id] = action;
     if(act.input) act.input[0](action);
@@ -829,22 +804,16 @@ function renderWaitPanel(){
   html += '<button class="iconBtn" id="copyBtn" title="복사">📋</button>';
   html += '<button class="iconBtn" id="shareBtn" title="공유">📤</button></div>';
   html += '<div class="playerList" style="margin-top:14px;">';
-  // 명단: 호스트는 roster(자기 관리), 게스트는 수신한 roster. 없으면 나만 표시.
-  const list = (roster && roster.length) ? roster : [{pid:myPid, name:myName, host:isHost}];
-  for(const p of list){
-    const isMe = (p.pid===myPid);
-    const cls = isMe ? 'me' : 'peer';
-    html += '<div class="pRow '+cls+'"><span class="pDot"></span>'+escapeHtml(p.name||'플레이어')
-      + (isMe?' (나)':'') + (p.host?' · 방장':'') + '</div>';
-  }
-  // 남은 슬롯 표시
-  for(let i=list.length; i<MAX_PLAYERS; i++){
-    html += '<div class="pRow empty"><span class="pDot"></span>빈 자리 (참가 대기중...)</div>';
+  html += '<div class="pRow me"><span class="pDot"></span>'+escapeHtml(myName)+' (나)'+(isHost?' · 방장':'')+'</div>';
+  if(peerId){
+    html += '<div class="pRow peer"><span class="pDot"></span>'+escapeHtml(peerName||'플레이어')+'</div>';
+  } else {
+    html += '<div class="pRow empty"><span class="pDot"></span>친구를 기다리는 중...</div>';
   }
   html += '</div>';
   if(isHost){
     html += '<button class="btn btn-gold" id="startBtn">게임 시작</button>';
-    html += '<div class="hint" style="margin-top:8px;">최대 '+MAX_PLAYERS+'인 협동 · 혼자서도 시작 가능</div>';
+    html += '<div class="hint" style="margin-top:8px;">혼자서도 시작할 수 있어요 (2인 협동 권장)</div>';
   } else {
     html += '<div class="hint" style="margin-top:14px;">방장이 게임을 시작하기를 기다리는 중...</div>';
   }
@@ -881,33 +850,29 @@ function resetLobbyUI(){
 })();
 
 /* ---------------- 시뮬레이션 (호스트 권위) ---------------- */
-function newSim(players){
-  const pids = (players && players.length) ? players.slice() : ['host'];
-  const golds = {}; const ready = {};
-  for(const pid of pids){ golds[pid] = 150; ready[pid] = false; }
+function newSim(){
   return {
-    players: pids,                // 참가 플레이어 pid 목록 (게임 시작 시점 고정)
-    golds, ready,                 // pid별 골드 풀 / 준비 상태
-    lives:20, wave:0,
+    goldHost:150, goldGuest:150, lives:20, wave:0,   // 골드는 각자 별도 풀
     phase:'prep',                 // 'prep'(로비 준비) → 'battle'
     prepTimer:LOBBY_PREP_TIME,    // 5분 준비 카운트다운
+    readyHost:false, readyGuest:false,
     waveActive:false, waveTimer:FIRST_PREP,
     spawnQueue:[], spawnTimer:0, spawnInterval:0.9,
     enemies:[], towers:[], projectiles:[],
+    minions:[], nextMinionId:1,   // 아군 소환수 (소환탑이 생성, 기지→적진 이동)
     nextEnemyId:1, nextTowerId:1, nextProjId:1,
     fireZones:[],                 // 활성 불바다 [{until, tickAcc}]
     flameSkillT:0,                // 화염탑 스킬 활성 남은 시간(초) — 기본공격 강화 지속
     fireTrails:[],                // 불타는 적이 남긴 불길 [{x,y,until,tickAcc}]
-    walls:[], nextWallId:1,       // 요새탑 스킬로 생성된 벽 [{id,x,y,dist,hp,maxHp,life,owner}]
     loadout: loadout.slice(),     // 팀 유닛 편성 (준비 페이즈에 변경 가능)
     gameOver:false, pendingEvents:[],
     sfxFire:{}, sfxKill:0, sfxBaseHit:0   // 동기화 구간 누적 (게스트 사운드용)
   };
 }
-// pid별 골드 접근 헬퍼 (호스트 시뮬레이션 내부용)
-function simGold(pid){ return sim.golds[pid] || 0; }
-function addGold(pid, amt){ if(sim.golds[pid]==null) sim.golds[pid]=0; sim.golds[pid] += amt; }
-function addGoldBoth(amt){ for(const pid of sim.players) sim.golds[pid] += amt; }   // 전원에게 지급
+// 소유자별 골드 접근 헬퍼 (호스트 시뮬레이션 내부용)
+function simGold(owner){ return owner==='guest' ? sim.goldGuest : sim.goldHost; }
+function addGold(owner, amt){ if(owner==='guest') sim.goldGuest += amt; else sim.goldHost += amt; }
+function addGoldBoth(amt){ sim.goldHost += amt; sim.goldGuest += amt; }
 // 킬 골드: 웨이브가 오를수록 획득량 증가 (기본골드 × 웨이브 배수)
 function killGold(type){
   const g = ENEMY_TYPES[type].gold;
@@ -972,6 +937,24 @@ function spawnEnemy(type){
     flameHits:0, trailAcc:0                        // 화염탑 명중 누적 / 불길 생성 누적
   });
 }
+// ---- 소환탑: 레벨별 소환 간격/소환수 스탯 ----
+function summonInterval(level){
+  const d = TOWER_TYPES.summon;
+  return Math.max(1.6, d.baseInterval - (level-1)*d.intervalStep);
+}
+function summonHp(level){ const d=TOWER_TYPES.summon; return Math.round(d.minHp + (level-1)*d.hpPerLv); }
+function summonDmg(level){ const d=TOWER_TYPES.summon; return d.minDmg + (level-1)*d.dmgPerLv; }
+// 아군 소환수 생성: 팀 기지(BASE)에서 출발해 적진(SPAWN) 방향으로 진행 (dist를 PATH_TOTAL→0 감소)
+function spawnMinion(tower){
+  const hp = summonHp(tower.level);
+  sim.minions.push({
+    id: sim.nextMinionId++, owner: tower.owner||'host',
+    dist: PATH_TOTAL, px: BASE_X, py: BASE_Y,
+    hp, maxHp: hp, dmg: summonDmg(tower.level),
+    speed: TOWER_TYPES.summon.minSpeed, r: TOWER_TYPES.summon.minR,
+    level: tower.level, atkAcc:0, fused:false
+  });
+}
 function towerStat(type, level, key){
   const def = TOWER_TYPES[type];
   const base = def[key];
@@ -1010,12 +993,13 @@ function applyInput(action, owner){
     if(sim.towers.length >= MAX_TOWERS) return {ok:false, reason:'max'};
     const x = action.x, y = action.y;
     if(typeof x!=='number' || typeof y!=='number') return {ok:false, reason:'none'};
-    if(!isBuildableSpot(x,y)) return {ok:false, reason:'zone'};
+    if(def.wall){ if(!isWallSpot(x,y)) return {ok:false, reason:'zone'}; }
+    else if(!isBuildableSpot(x,y)) return {ok:false, reason:'zone'};
     if(sim.towers.some(t=>{ const dx=t.x-x, dy=t.y-y; return dx*dx+dy*dy < MIN_TOWER_GAP*MIN_TOWER_GAP; })) return {ok:false, reason:'gap'};
     if(simGold(owner) < def.cost) return {ok:false, reason:'gold'};
     addGold(owner, -def.cost);
     const tw = {id:sim.nextTowerId++, x, y, type:action.towerType, level:1, cd:0, owner, invested:def.cost, skillCd:0, lastUpWave:sim.wave};
-    if(action.towerType==='fortress') tw.stored = 0;   // 요새탑: 스킬용 누적 피해량
+    if(def.wall){ tw.wallHp = def.contactDmg; tw.wallMaxHp = def.contactDmg; tw.wallDist = projectToPathDist(x,y); }   // 초기 체력 = 1회 접촉 피해
     sim.towers.push(tw);
     return {ok:true};
   }
@@ -1090,32 +1074,36 @@ function applyInput(action, owner){
       pushEvent({t:'wave'});
       return {ok:true};
     }
-    // 요새탑 스킬 → 누적 피해량만큼 체력의 벽을 길 위에 생성
-    if(t.type==='fortress'){
-      const def = TOWER_TYPES.fortress;
+    // 소환탑 5렙 스킬 → 길 위 모든 아군 소환수를 하나로 융합
+    if(t.type==='summon'){
+      const def = TOWER_TYPES.summon;
+      if(t.level < def.skillLevel) return {ok:false, reason:'none'};
       if(t.skillCd>0) return {ok:false, reason:'cd'};
-      const hp = Math.floor(t.stored||0);
-      if(hp < 1) return {ok:false, reason:'none'};
-      // 벽 위치: 요새탑 사거리 안에서 가장 앞선 적의 경로 지점, 없으면 요새탑에서 가장 가까운 경로 지점
-      let wallDist = null, best=-1;
-      const range = towerStat('fortress', t.level, 'range');
-      for(const e of sim.enemies){
-        const dx=e.px-t.x, dy=e.py-t.y;
-        if(dx*dx+dy*dy <= range*range && e.dist>best){ best=e.dist; wallDist=e.dist; }
-      }
-      if(wallDist==null) wallDist = projectToPathDist(t.x, t.y);
-      const p = pathPos(wallDist);
+      if(sim.minions.length < 1){ return {ok:false, reason:'none'}; }
       t.skillCd = def.skillCd;
-      t.stored = 0;   // 누적 소모
-      sim.walls.push({id:sim.nextWallId++, x:p.x, y:p.y, dist:wallDist, hp:hp, maxHp:hp, life:def.wallLife, owner:t.owner});
-      pushEvent({t:'wallUp', hp});
+      // 모든 소환수의 체력/피해를 합산, 융합체는 합산 체력의 2배를 가짐
+      let sumHp=0, sumMax=0, sumDmg=0, lead=null;
+      for(const m of sim.minions){
+        sumHp += m.hp; sumMax += m.maxHp; sumDmg += m.dmg;
+        if(!lead || m.dist < lead.dist) lead = m;   // dist 작을수록 적진에 가까움
+      }
+      const fusedHp = sumHp*2, fusedMax = sumMax*2;   // 길 위 모든 괴물 체력 합의 2배
+      const fused = {
+        id: sim.nextMinionId++, owner: t.owner||'host',
+        dist: lead.dist, px: lead.px, py: lead.py,
+        hp: fusedHp, maxHp: fusedMax, dmg: sumDmg,
+        speed: def.minSpeed*0.78, r: Math.min(54, def.minR + Math.sqrt(sim.minions.length)*7),
+        level: t.level, atkAcc:0, fused:true
+      };
+      sim.minions = [fused];
+      pushEvent({t:'fuse'});
       return {ok:true};
     }
     return {ok:false, reason:'none'};
   }
   if(action.type==='ready'){
     if(sim.phase!=='prep') return {ok:false, reason:'none'};
-    sim.ready[owner] = true;
+    if(owner==='host') sim.readyHost = true; else sim.readyGuest = true;
     return {ok:true};
   }
   if(action.type==='sell'){
@@ -1160,8 +1148,7 @@ function fireTower(tower, target){
     speed: def.speed, dmg: towerStat(tower.type,tower.level,'dmg'),
     splash: def.splash||0, slow: def.slow||0, slowDur: def.slowDur||0,
     type: def.proj,
-    flameSkill: (tower.type==='flame' && sim.flameSkillT>0),  // 스킬 활성 중 발사한 화염탑 탄
-    srcId: (tower.type==='fortress' ? tower.id : 0)           // 요새탑: 명중 시 피해를 누적할 타워
+    flameSkill: (tower.type==='flame' && sim.flameSkillT>0)   // 스킬 활성 중 발사한 화염탑 탄
   });
   sim.sfxFire[tower.type] = (sim.sfxFire[tower.type]||0) + 1;
   if(soundReady && sfxBudget.fire < 4){ sfxBudget.fire++; Snd.play('fire', tower.type); }
@@ -1195,11 +1182,6 @@ function applyHit(proj, target){
   }
   const dmg = Math.max(1, base - (target.armor||0));   // 장갑: 정면 피해 경감(최소 1)
   target.hp -= dmg;
-  // 요새탑: 실제로 입힌 피해를 스킬용 체력으로 누적
-  if(proj.srcId){
-    const src = sim.towers.find(t=>t.id===proj.srcId);
-    if(src) src.stored = (src.stored||0) + dmg;
-  }
   // 화염탑 스킬: 명중 시 적을 불태움(도트). 파란불이면 도트도 강화.
   if(proj.flameSkill){
     const fd = TOWER_TYPES.flame;
@@ -1228,8 +1210,8 @@ function hostTick(dt){
   // ---- 준비 페이즈: 적 없음, 둘 다 준비 완료거나 5분 경과 시 전투 시작 ----
   if(sim.phase==='prep'){
     sim.prepTimer -= dt;
-    const allReady = sim.players.every(pid => sim.ready[pid]);
-    if(allReady || sim.prepTimer<=0){
+    const bothReady = sim.readyHost && (!peerId || sim.readyGuest);
+    if(bothReady || sim.prepTimer<=0){
       sim.phase = 'battle';
       sim.waveTimer = FIRST_PREP;
       pushEvent({t:'battleStart'});
@@ -1254,33 +1236,35 @@ function hostTick(dt){
     if(e.dist >= PATH_TOTAL){ sim.lives -= e.dmg; e.dead=true; sim.sfxBaseHit++; if(soundReady) Snd.play('baseHit'); }
   }
 
-  // ---- 요새탑 벽: 길 위에서 적을 막음. 닿으면 그 적 체력만큼 벽 체력이 깎이고 적은 소멸(흡수) ----
-  if(sim.walls.length){
-    const fwd = TOWER_TYPES.fortress;
-    const r2 = fwd.wallR*fwd.wallR;
-    for(const w of sim.walls){
-      w.life -= dt;
-      if(w.hp<=0 || w.life<=0) continue;
+  // ---- 요새탑(벽): 길을 막고 접촉한 적에게 피해. 입힌 피해만큼 체력 상승, 적은 벽을 때려 체력 감소 ----
+  const fwd = TOWER_TYPES.fortress;
+  const walls = sim.towers.filter(t=>t.type==='fortress' && (t.wallHp||0)>0);
+  if(walls.length){
+    for(const w of walls){
+      const cd = fwd.contactDmg * w.level;   // 초당 접촉 피해
+      const r2 = fwd.wallR*fwd.wallR;
       for(const e of sim.enemies){
-        if(e.dead || w.hp<=0) continue;
+        if(e.dead) continue;
         const dx=e.px-w.x, dy=e.py-w.y;
         if(dx*dx+dy*dy > r2) continue;
-        // 벽이 남은 체력으로 적을 막음
-        if(w.hp >= e.hp){
-          w.hp -= e.hp;               // 적 체력만큼 벽 소모
-          addGoldBoth(killGold(e.type));  // 흡수한 적도 처치로 간주 → 보상
-          e.hp = 0; e.dead = true;    // 적 소멸
-          sim.sfxKill++;
-        } else {
-          // 벽 체력이 부족하면: 남은 체력만큼 적에게 피해 주고 벽은 파괴
-          e.hp -= w.hp;
-          w.hp = 0;
-          // 벽 지점 직전에서 잠깐 막힘 → 자연스럽게 통과
-          if(e.dist > w.dist){ e.dist = w.dist; const p=pathPos(e.dist); e.px=p.x; e.py=p.y; e.x=p.x; }
+        // 벽 앞에서 정지: 진행거리를 벽 지점 직전으로 되돌려 통과 차단
+        if(e.dist > w.wallDist - fwd.wallR*0.6){
+          e.dist = w.wallDist - fwd.wallR*0.6;
+          const p = pathPos(e.dist); e.px=p.x; e.py=p.y; e.x=p.x;
         }
+        const dealt = cd*dt;
+        e.hp -= dealt;
+        w.wallHp += dealt;                        // 입힌 피해만큼 체력 증가
+        if(w.wallHp > w.wallMaxHp) w.wallMaxHp = w.wallHp;
+        w.wallHp -= (e.dmg||1)*dt;                // 적이 벽을 두들김
       }
+      if(w.wallHp<=0) w.wallHp=0;
     }
-    sim.walls = sim.walls.filter(w=>w.hp>0 && w.life>0);
+    // 파괴된 벽 제거
+    for(let i=sim.towers.length-1;i>=0;i--){
+      const t=sim.towers[i];
+      if(t.type==='fortress' && (t.wallHp||0)<=0 && t.wallMaxHp!=null){ sim.towers.splice(i,1); }
+    }
   }
 
   // ---- 치유형 적: 주변 적을 초당 heal 만큼 회복 (최대체력 한도) ----
@@ -1337,6 +1321,43 @@ function hostTick(dt){
     sim.fireTrails = sim.fireTrails.filter(ft=>ft.until>0);
   }
 
+  // ---- 아군 소환수: 기지→적진으로 진행, 마주친 적과 접촉 전투 ----
+  if(sim.minions.length){
+    const CONTACT = 26;   // 소환수-적 접촉 판정 거리
+    for(const m of sim.minions){
+      // 앞쪽(적진 방향, dist 더 작은 쪽)에서 가장 가까운 접촉 범위 내 적 탐색
+      let blocker=null, bestD=Infinity;
+      for(const e of sim.enemies){
+        const dx=e.px-m.px, dy=e.py-m.py;
+        const d2=dx*dx+dy*dy;
+        const reach=(CONTACT + (e.r||12) + m.r*0.4);
+        if(d2 <= reach*reach && d2<bestD){ bestD=d2; blocker=e; }
+      }
+      if(blocker){
+        // 교전: 서로 피해. 소환수는 dmg/초, 적은 자기 dmg의 6배/초로 반격
+        m.atkAcc += dt;
+        if(m.atkAcc >= 0.2){
+          m.atkAcc -= 0.2;
+          blocker.hp -= m.dmg*0.2;
+          m.hp -= (blocker.dmg||1)*6*0.2;
+        }
+        // 교전 중에는 전진 정지 (적을 막아섬)
+      } else {
+        // 전진: 적진(SPAWN, dist=0) 방향으로 이동
+        m.dist -= m.speed*dt;
+        if(m.dist <= 0){
+          // 적진 도달: 소멸하며 소량 골드 보상 (양팀)
+          m.dist = 0; m.arrived = true;
+          addGoldBoth(6 + m.level*2);
+        }
+      }
+      const p = pathPos(Math.max(0, m.dist));
+      m.px = p.x; m.py = p.y;
+    }
+    // 죽거나 도달한 소환수 제거
+    sim.minions = sim.minions.filter(m=> m.hp>0 && !m.arrived);
+  }
+
   sim.enemies = sim.enemies.filter(e=>{
     if(e.dead) return false;
     if(e.hp<=0){ addGoldBoth(killGold(e.type)); sim.sfxKill++; if(soundReady && sfxBudget.kill < 4){ sfxBudget.kill++; Snd.play('kill'); } return false; }
@@ -1350,7 +1371,14 @@ function hostTick(dt){
 
   for(const t of sim.towers){
     if(t.skillCd>0) t.skillCd = Math.max(0, t.skillCd-dt);
-    if(t.type==='bank') continue;   // 은행탑은 발사 안 함
+    // 소환탑: 일정 간격마다 아군 소환수 생성 (전투 페이즈에서만)
+    if(t.type==='summon'){
+      t.summonAcc = (t.summonAcc||0) + dt;
+      const iv = summonInterval(t.level);
+      if(t.summonAcc >= iv){ t.summonAcc -= iv; spawnMinion(t); }
+      continue;
+    }
+    if(t.type==='bank' || t.type==='fortress') continue;   // 은행탑·요새탑은 발사 안 함
     t.cd -= dt;
     if(t.cd<=0){
       const target = findTarget(t);
@@ -1419,15 +1447,12 @@ function hostTick(dt){
 }
 function buildSnapshot(){
   return {
-    gm: sim.golds,                // pid별 골드 맵 (게스트는 자기 것 조회)
-    pl: sim.players,              // 플레이어 pid 목록
-    rm: sim.ready,                // pid별 준비 상태
-    l: sim.lives, w: sim.wave,
-    ph: sim.phase, pt: Math.round(Math.max(0,sim.prepTimer)),
+    g: Math.round(sim.goldGuest), l: sim.lives, w: sim.wave,
+    ph: sim.phase, pt: Math.round(Math.max(0,sim.prepTimer)), rh: sim.readyHost?1:0, rg: sim.readyGuest?1:0,
     wa: sim.waveActive?1:0, wt: Math.round(Math.max(0,sim.waveTimer)*10)/10,
     e: sim.enemies.map(e=>[e.id,e.type,Math.round(e.px),e.hp,e.maxHp,Math.round(e.py)]),
-    t: sim.towers.map(t=>[t.id,Math.round(t.x),Math.round(t.y),t.type,t.level,t.owner,t.invested,Math.round((t.skillCd||0)*10)/10,Math.round(t.stored||0)]),
-    wl: sim.walls.map(w=>[Math.round(w.x),Math.round(w.y),Math.round(w.hp),Math.round(w.maxHp),Math.round(w.life*10)/10]),
+    m: sim.minions.map(m=>[m.id,Math.round(m.px),Math.round(m.py),Math.round(m.hp),Math.round(m.maxHp),m.fused?1:0,Math.round(m.r)]),
+    t: sim.towers.map(t=>[t.id,Math.round(t.x),Math.round(t.y),t.type,t.level,t.owner,t.invested,Math.round((t.skillCd||0)*10)/10,Math.round(t.wallHp||0),Math.round(t.wallMaxHp||0)]),
     lo: sim.loadout || loadout,
     p: sim.projectiles.map(p=>[Math.round(p.x),Math.round(p.y),p.type]),
     fz: sim.flameSkillT>0 ? 1 : 0,
@@ -1441,11 +1466,8 @@ function buildSnapshot(){
 
 /* ---------------- 게스트: 스냅샷 반영 ---------------- */
 function onNetSync(data){
-  const myGold = data.gm ? (data.gm[myPid]||0) : (data.g||0);
-  const myReady = data.rm ? !!data.rm[myPid] : false;
-  guestState = {gold:myGold, lives:data.l, wave:data.w, waveActive:!!data.wa, waveTimer:data.wt, gameOver:!!data.go,
-    phase:data.ph||'battle', prepTimer:data.pt||0, myReady:myReady, fireActive:!!data.fz,
-    golds:data.gm||{}, players:data.pl||[], readyMap:data.rm||{}};
+  guestState = {gold:data.g, lives:data.l, wave:data.w, waveActive:!!data.wa, waveTimer:data.wt, gameOver:!!data.go,
+    phase:data.ph||'battle', prepTimer:data.pt||0, readyHost:!!data.rh, readyGuest:!!data.rg, fireActive:!!data.fz};
   if(data.sp===1||data.sp===2||data.sp===3||data.sp===5){ gameSpeed = data.sp; updateSpeedBtn(); }
 
   const seen = new Set();
@@ -1460,8 +1482,7 @@ function onNetSync(data){
     if(!seen.has(Number(idStr))) delete guestEnemies[idStr];
   }
 
-  guestTowers = data.t.map(tup=>({id:tup[0], x:tup[1], y:tup[2], type:tup[3], level:tup[4], owner:tup[5], invested:tup[6], skillCd:tup[7]||0, stored:tup[8]||0}));
-  guestWalls = (data.wl||[]).map(tup=>({x:tup[0], y:tup[1], hp:tup[2], maxHp:tup[3], life:tup[4]}));
+  guestTowers = data.t.map(tup=>({id:tup[0], x:tup[1], y:tup[2], type:tup[3], level:tup[4], owner:tup[5], invested:tup[6], skillCd:tup[7]||0, wallHp:tup[8]||0, wallMaxHp:tup[9]||0}));
   if(Array.isArray(data.lo) && data.lo.length){
     const changed = data.lo.length!==loadout.length || data.lo.some((x,i)=>x!==loadout[i]);
     if(changed) applyLoadout(data.lo);
@@ -1472,6 +1493,19 @@ function onNetSync(data){
   }
   guestProjectiles = data.p.map(tup=>({x:tup[0], y:tup[1], type:tup[2]}));
   guestFireTrails = (data.ft||[]).map(tup=>({x:tup[0], y:tup[1], blue:!!tup[2]}));
+
+  // 아군 소환수 동기화
+  const seenM = new Set();
+  for(const tup of (data.m||[])){
+    const [id,x,y,hp,maxHp,fused,r] = tup;
+    seenM.add(id);
+    let mn = guestMinions[id];
+    if(!mn) guestMinions[id] = {x, rx:x, py:y, ry:y, hp, maxHp, fused:!!fused, r};
+    else { mn.x=x; mn.py=y; mn.hp=hp; mn.maxHp=maxHp; mn.fused=!!fused; mn.r=r; }
+  }
+  for(const idStr of Object.keys(guestMinions)){
+    if(!seenM.has(Number(idStr))) delete guestMinions[idStr];
+  }
 
   // 게스트 전투 사운드 (집계 기반, 과하지 않게 소량만)
   if(soundReady){
@@ -1495,43 +1529,34 @@ function tickGuestInterp(dt){
     e.ry += (e.py - (e.ry!=null?e.ry:e.py))*f;
     if(e.ry==null) e.ry = e.py;
   }
+  for(const id in guestMinions){
+    const m = guestMinions[id];
+    m.rx += (m.x - m.rx)*f;
+    m.ry += (m.py - (m.ry!=null?m.ry:m.py))*f;
+    if(m.ry==null) m.ry = m.py;
+  }
 }
 
 /* ---------------- 헬퍼: 호스트/게스트 공용 조회 ---------------- */
-function gold(){ return isHost ? (sim?(sim.golds[myPid]||0):0) : (guestState ? guestState.gold : 0); }
+function gold(){ return isHost ? (sim?sim.goldHost:0) : (guestState ? guestState.gold : 0); }
 function lives(){ return isHost ? sim.lives : (guestState ? guestState.lives : 0); }
 function waveNum(){ return isHost ? sim.wave : (guestState ? guestState.wave : 0); }
 function waveActiveNow(){ return isHost ? sim.waveActive : (guestState ? guestState.waveActive : false); }
 function waveTimerNow(){ return isHost ? sim.waveTimer : (guestState ? guestState.waveTimer : 0); }
 function phaseNow(){ return isHost ? (sim?sim.phase:'prep') : (guestState ? guestState.phase : 'prep'); }
 function prepTimerNow(){ return isHost ? (sim?sim.prepTimer:0) : (guestState ? guestState.prepTimer : 0); }
-function iAmReady(){ if(isHost) return !!(sim && sim.ready[myPid]); return !!(guestState && guestState.myReady); }
+function iAmReady(){ if(isHost) return sim&&sim.readyHost; return guestState && guestState.readyGuest; }
 function fireActiveNow(){ return isHost ? (sim&&sim.flameSkillT>0) : (guestState && guestState.fireActive); }
 function getRenderTrails(){ return isHost ? (sim?sim.fireTrails:[]) : guestFireTrails; }
-function getRenderWalls(){ return isHost ? (sim?sim.walls:[]) : guestWalls; }
-// pid 목록(게임 중): 호스트는 sim.players, 게스트는 스냅샷 players
-function playerIds(){ return isHost ? (sim?sim.players:[]) : (guestState?guestState.players:[]) || []; }
-// pid → 표시 이름 (로스터 기준, 없으면 방장/플레이어N)
-function pidName(pid){
-  const r = roster.find(p=>p.pid===pid);
-  if(r) return r.name + (r.host?' (방장)':'');
-  if(pid==='host') return '방장';
-  return '플레이어';
-}
-// 4인 색상 팔레트 (설치자 구분용)
-const PLAYER_COLORS = ['#4fc3d9','#e0574a','#7fd06a','#e8b13d'];
-function pidColor(pid){
-  const ids = playerIds();
-  let i = ids.indexOf(pid);
-  if(i<0) i = (pid==='host'?0:1);
-  return PLAYER_COLORS[i % PLAYER_COLORS.length];
-}
 function getRenderEnemies(){
   if(isHost) return sim.enemies.map(e=>({type:e.type, px:e.px, py:e.py, x:e.x, hp:e.hp, maxHp:e.maxHp}));
   return Object.values(guestEnemies).map(e=>({type:e.type, px:e.rx, py:(e.ry!=null?e.ry:e.py), x:e.rx, hp:e.hp, maxHp:e.maxHp}));
 }
 function getRenderTowers(){ return isHost ? sim.towers : guestTowers; }
-function getRenderProjectiles(){ return isHost ? sim.projectiles : guestProjectiles; }
+function getRenderMinions(){
+  if(isHost) return sim.minions.map(m=>({px:m.px, py:m.py, hp:m.hp, maxHp:m.maxHp, fused:m.fused, r:m.r}));
+  return Object.values(guestMinions).map(m=>({px:(m.rx!=null?m.rx:m.x), py:(m.ry!=null?m.ry:m.py), hp:m.hp, maxHp:m.maxHp, fused:m.fused, r:m.r}));
+}function getRenderProjectiles(){ return isHost ? sim.projectiles : guestProjectiles; }
 function towerNear(wx,wy,radius){
   const r = radius||30;
   let best=null, bestD=r*r;
@@ -1560,8 +1585,8 @@ function showBanner(evt){
   else if(evt.t==='battleStart'){ title='전투 시작!'; sub='첫 웨이브가 곧 몰려온다'; if(soundReady) Snd.play('waveStart'); }
   else if(evt.t==='skill'){ title='🔥 업화 각인'; sub='30초간 공격이 적을 불태우고 불길을 남긴다'; if(soundReady) Snd.play('fire','cannon'); }
   else if(evt.t==='wave'){ title='✦ 에너지파'; sub='관통하는 파동이 적을 꿰뚫는다'; if(soundReady) Snd.play('fire','mage'); }
+  else if(evt.t==='fuse'){ title='🌀 소환수 융합'; sub='모든 아군 소환수가 하나의 거대체가 되었다'; if(soundReady) Snd.play('fire','cannon'); }
   else if(evt.t==='decay'){ title='각성자 약화'; sub='업그레이드를 하지 않아 힘이 빠졌다'; if(soundReady) Snd.play('sell'); }
-  else if(evt.t==='wallUp'){ title='🛡 성벽 소환'; sub='체력 '+evt.hp+'의 벽이 길을 막는다'; if(soundReady) Snd.play('place'); }
   else if(evt.t==='gameOver'){ title='기지 함락'; sub='웨이브 '+evt.wave+'에서 무너졌다'; if(soundReady){ Snd.stopBgm(); Snd.play('gameOver'); } }
   else return;
   typewrite(eventTxt, title);
@@ -1689,11 +1714,10 @@ function renderInfoPopup(){
     const cd = tower.skillCd||0;
     html += '<button class="skillMini'+(cd>0?' cool':'')+'" id="popSkill">✦'+(cd>0?'<span>'+Math.ceil(cd)+'</span>':'')+'</button>';
   }
-  // 요새탑: 누적 피해로 벽 생성 스킬 버튼 (누적이 있고 쿨이 아닐 때 활성)
-  if(tower.type==='fortress'){
+  // 소환탑 5렙: 융합 스킬 버튼
+  if(tower.type==='summon' && lvl>=def.skillLevel){
     const cd = tower.skillCd||0;
-    const ready = cd<=0 && (tower.stored||0)>=1;
-    html += '<button class="skillMini'+(ready?'':' cool')+'" id="popSkill">🛡'+(cd>0?'<span>'+Math.ceil(cd)+'</span>':'')+'</button>';
+    html += '<button class="skillMini'+(cd>0?' cool':'')+'" id="popSkill">🌀'+(cd>0?'<span>'+Math.ceil(cd)+'</span>':'')+'</button>';
   }
   html += '<button class="x" id="popX">✕</button></div>';
 
@@ -1702,11 +1726,16 @@ function renderInfoPopup(){
   if(tower.type==='bank'){
     html += statRow('웨이브 수입', '+'+(def.income*lvl)+' 골드');
   } else if(tower.type==='fortress'){
-    html += statRow('공격력', Math.round(towerStat(tower.type,lvl,'dmg')));
-    html += statRow('사거리', Math.round(towerStat(tower.type,lvl,'range')));
-    html += statRow('연사(초)', towerStat(tower.type,lvl,'rate').toFixed(2));
-    html += statRow('누적 피해', '🛡'+Math.round(tower.stored||0));
-    html += statRow('스킬', '누적 피해=체력 벽 생성('+def.skillCd+'초 쿨)');
+    html += statRow('접촉 피해', (def.contactDmg*lvl)+'/초');
+    html += statRow('체력', Math.round(tower.wallHp||0));
+    html += statRow('특성', '입힌 피해만큼 체력↑');
+  } else if(tower.type==='summon'){
+    html += statRow('소환 간격', summonInterval(lvl).toFixed(1)+'초');
+    html += statRow('소환수 체력', summonHp(lvl));
+    html += statRow('소환수 피해', Math.round(summonDmg(lvl))+'/초');
+    html += statRow('특성', '기지→적진으로 진군');
+    if(lvl<MAX_LEVEL) html += statRow('스킬', 'Lv.5에서 융합 해금');
+    else html += statRow('스킬', '길 위 소환수 융합('+def.skillCd+'초 쿨)');
   } else if(tower.type==='flame'){
     html += statRow('공격력(도트)', Math.round(towerStat(tower.type,lvl,'dmg')));
     html += statRow('사거리', Math.round(towerStat(tower.type,lvl,'range')));
@@ -1737,7 +1766,7 @@ function renderInfoPopup(){
       }
     }
   }
-  html += statRow('설치자', pidName(tower.owner));
+  html += statRow('설치자', tower.owner==='host'?'호스트':'게스트');
   html += '</div>';
 
   html += '<div class="row">';
@@ -1756,7 +1785,6 @@ function renderInfoPopup(){
   if(skBtn){
     skBtn.onclick = ()=>{
       if((tower.skillCd||0)>0){ toast('스킬 재사용 대기 중입니다'); return; }
-      if(tower.type==='fortress' && (tower.stored||0)<1){ toast('적을 공격해 피해를 쌓으세요'); return; }
       submitAction({type:'skill', towerId:tower.id});
     };
   }
@@ -1803,43 +1831,10 @@ function draw(){
   drawRangeAndPreview();
   drawTowers();
   drawFireZone();
-  drawWalls();
   drawEnemies();
+  drawMinions();
   drawProjectiles();
   ctx.restore();
-}
-function drawWalls(){
-  const walls = getRenderWalls();
-  if(!walls || !walls.length) return;
-  const fwd = TOWER_TYPES.fortress;
-  const R = fwd.wallR;
-  for(const w of walls){
-    const pct = w.maxHp>0 ? Math.max(0,Math.min(1, w.hp/w.maxHp)) : 0;
-    // 돌벽 블록 (경로를 가로지르는 사각)
-    ctx.fillStyle='#565d6c';
-    ctx.fillRect(w.x-R, w.y-R-2, R*2, R*2+4);
-    ctx.fillStyle='#9aa3b2';
-    ctx.fillRect(w.x-R+3, w.y-R+1, R*2-6, R*2-2);
-    // 흉벽 톱니
-    ctx.fillStyle='#565d6c';
-    for(let i=-R; i<R-2; i+=11){ ctx.fillRect(w.x+i, w.y-R-6, 7, 6); }
-    // 벽돌 이음선
-    ctx.strokeStyle='rgba(0,0,0,.28)'; ctx.lineWidth=1.5;
-    ctx.beginPath();
-    ctx.moveTo(w.x-R+3, w.y); ctx.lineTo(w.x+R-3, w.y);
-    ctx.moveTo(w.x-6, w.y-R+1); ctx.lineTo(w.x-6, w.y);
-    ctx.moveTo(w.x+8, w.y); ctx.lineTo(w.x+8, w.y+R);
-    ctx.stroke();
-    // 체력바
-    const bw=R*2;
-    ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(w.x-bw/2, w.y-R-14, bw, 5);
-    ctx.fillStyle = pct>0.4 ? '#7fd06a' : '#e0574a';
-    ctx.fillRect(w.x-bw/2, w.y-R-14, bw*pct, 5);
-    ctx.fillStyle='#fff'; ctx.font='900 10px "Black Han Sans",sans-serif';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(Math.round(w.hp), w.x, w.y+2);
-    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-  }
 }
 function drawFireZone(){
   // 불타는 적이 남긴 불길 트레일을 렌더 (호스트/게스트 공용)
@@ -2013,12 +2008,46 @@ function drawTowerShape(x,y,type,level,alpha){
     drawStar(x, y, 5, 9, 4);
   }
   else if(type==='fortress'){
-    // 성채 타워: 원형 몸체 + 흉벽
-    ctx.beginPath(); ctx.arc(x,y,17,0,Math.PI*2); ctx.fill();
+    // 돌벽: 성벽 블록 + 상단 흉벽
     ctx.fillStyle=d.dark;
-    for(let i=-16;i<16;i+=11){ ctx.fillRect(x+i, y-22, 6, 7); }
-    ctx.fillStyle='#c7ccd6';
-    ctx.fillRect(x-4,y-6,8,14);
+    ctx.fillRect(x-22, y-14, 44, 30);
+    ctx.fillStyle=d.color;
+    ctx.fillRect(x-20, y-12, 40, 26);
+    // 흉벽(톱니)
+    ctx.fillStyle=d.dark;
+    for(let i=-20;i<20;i+=13){ ctx.fillRect(x+i, y-18, 7, 6); }
+    // 벽돌 이음선
+    ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.moveTo(x-20,y); ctx.lineTo(x+20,y);
+    ctx.moveTo(x-6,y-12); ctx.lineTo(x-6,y);
+    ctx.moveTo(x+8,y); ctx.lineTo(x+8,y+14);
+    ctx.stroke();
+  }
+  else if(type==='summon'){
+    // 소환의 포탈: 회전하는 룬 링 + 중앙 소용돌이
+    const spin = performance.now()/600;
+    ctx.save();
+    ctx.translate(x,y);
+    // 바깥 링
+    ctx.strokeStyle=d.color; ctx.lineWidth=3.5;
+    ctx.beginPath(); ctx.arc(0,0,19,0,Math.PI*2); ctx.stroke();
+    // 룬 점 (회전)
+    ctx.fillStyle='#bff4f8';
+    for(let i=0;i<6;i++){
+      const a = spin + i*Math.PI/3;
+      ctx.beginPath(); ctx.arc(Math.cos(a)*19, Math.sin(a)*19, 3, 0, Math.PI*2); ctx.fill();
+    }
+    // 중앙 소용돌이
+    const g = ctx.createRadialGradient(0,0,2,0,0,15);
+    g.addColorStop(0,'#eaffff'); g.addColorStop(0.5,d.color); g.addColorStop(1,d.dark);
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.arc(0,0,13,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    if(level>=MAX_LEVEL){ // 5렙: 발광 링 (융합 스킬 해금)
+      ctx.strokeStyle='rgba(120,240,255,'+(0.5+Math.sin(performance.now()/200)*0.3).toFixed(2)+')';
+      ctx.lineWidth=3; ctx.beginPath(); ctx.arc(x,y,26,0,Math.PI*2); ctx.stroke();
+    }
   }
   // 레벨 표시: 무한 타워는 숫자, 그 외는 점(최대 5)
   if(TOWER_TYPES[type].infinite){
@@ -2047,6 +2076,14 @@ function drawStar(cx, cy, spikes, outer, inner){
 }
 function drawBuildZones(){
   if(!selectedTowerType && !bulkUpOpen) return;
+  const isWall = selectedTowerType && !!TOWER_TYPES[selectedTowerType].wall;
+  if(isWall){
+    // 요새탑: 길 위를 설치 가능 구역(초록 띠)으로 강조
+    ctx.strokeStyle='rgba(127,208,106,.30)'; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.lineWidth=WALL_ONPATH*2;
+    strokePath();
+    return;
+  }
   // 설치 가능 필드 은은한 강조
   ctx.fillStyle = 'rgba(255,255,255,.06)';
   ctx.fillRect(0, 0, WORLD_W, WORLD_H);
@@ -2077,15 +2114,19 @@ function drawTowers(){
   for(const t of getRenderTowers()){
     drawTowerShape(t.x, t.y, t.type, t.level, 1);
     if(t.owner){
-      ctx.strokeStyle = pidColor(t.owner);
+      ctx.strokeStyle = t.owner==='host' ? COL_TEAL : COL_CRIMSON;
       ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.arc(t.x, t.y, 30, 0, Math.PI*2); ctx.stroke();
     }
-    // 요새탑: 누적 피해(스킬 벽 체력) 표시
-    if(t.type==='fortress' && (t.stored||0)>0){
-      ctx.fillStyle=COL_GOLD; ctx.font='900 11px "Black Han Sans",sans-serif';
+    // 요새탑: 체력바 + 수치 표시
+    if(t.type==='fortress' && t.wallMaxHp>0){
+      const w=44, pct=Math.max(0,Math.min(1, (t.wallHp||0)/t.wallMaxHp));
+      ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(t.x-w/2, t.y+20, w, 6);
+      ctx.fillStyle = pct>0.4 ? '#7fd06a' : '#e0574a';
+      ctx.fillRect(t.x-w/2, t.y+20, w*pct, 6);
+      ctx.fillStyle='#fff'; ctx.font='900 10px "Black Han Sans",sans-serif';
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('🛡'+Math.round(t.stored), t.x, t.y+26);
+      ctx.fillText(Math.round(t.wallHp||0), t.x, t.y+30);
       ctx.textAlign='left'; ctx.textBaseline='alphabetic';
     }
   }
@@ -2135,6 +2176,155 @@ function drawEnemies(){
     ctx.fillRect(ex-w/2, ey-r-11, w*pct, 5);
   }
 }
+function drawMinions(){
+  const now = performance.now()/1000;
+  for(const m of getRenderMinions()){
+    const r = m.r || 15;
+    const ex = m.px, ey = m.py;
+    if(m.fused){ drawMahoraga(ex, ey, r, now, m); continue; }
+
+    // ---- 일반 소환수: 청록 에너지 정령 (간지 강화) ----
+    // 이중 발광 오라 + 회전 링
+    const glow = ctx.createRadialGradient(ex, ey, r*0.2, ex, ey, r*2.2);
+    glow.addColorStop(0, 'rgba(150,245,255,.55)');
+    glow.addColorStop(0.5, 'rgba(87,201,209,.28)');
+    glow.addColorStop(1, 'rgba(87,201,209,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(ex, ey, r*2.2, 0, Math.PI*2); ctx.fill();
+    // 궤도 룬 입자
+    ctx.fillStyle='rgba(190,250,255,.9)';
+    for(let i=0;i<3;i++){
+      const a = now*2.2 + i*Math.PI*2/3;
+      const orx = ex + Math.cos(a)*(r+7), ory = ey + Math.sin(a)*(r+7)*0.6;
+      ctx.beginPath(); ctx.arc(orx, ory, 2.4, 0, Math.PI*2); ctx.fill();
+    }
+    // 그림자
+    ctx.fillStyle='rgba(10,40,45,.28)';
+    ctx.beginPath(); ctx.ellipse(ex, ey+r*0.9, r*0.9, r*0.34, 0, 0, Math.PI*2); ctx.fill();
+    // 몸체 (수정질 그라데이션 + 꿈틀)
+    const wob = 1 + Math.sin(now*4 + ex*0.05)*0.07;
+    const body = ctx.createRadialGradient(ex-r*0.3, ey-r*0.35, r*0.2, ex, ey, r);
+    body.addColorStop(0, '#d6fbff');
+    body.addColorStop(0.55, '#57c9d1');
+    body.addColorStop(1, '#256a70');
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.arc(ex, ey, r*wob, 0, Math.PI*2); ctx.fill();
+    // 결정 하이라이트
+    ctx.fillStyle='rgba(255,255,255,.5)';
+    ctx.beginPath(); ctx.ellipse(ex-r*0.32, ey-r*0.36, r*0.28, r*0.18, -0.5, 0, Math.PI*2); ctx.fill();
+    // 뾰족 결정 뿔 (위쪽)
+    ctx.fillStyle='#bff4f8';
+    ctx.beginPath(); ctx.moveTo(ex, ey-r*1.5); ctx.lineTo(ex-r*0.22, ey-r*0.7); ctx.lineTo(ex+r*0.22, ey-r*0.7); ctx.closePath(); ctx.fill();
+    // 눈 (전방=좌측, 빛나는 흰 슬릿)
+    ctx.fillStyle='#04343c';
+    ctx.beginPath(); ctx.arc(ex-r*0.42, ey-r*0.02, Math.max(2,r*0.15), 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex-r*0.06, ey-r*0.02, Math.max(2,r*0.15), 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(210,255,255,.95)';
+    ctx.beginPath(); ctx.arc(ex-r*0.42, ey-r*0.06, Math.max(1,r*0.06), 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex-r*0.06, ey-r*0.06, Math.max(1,r*0.06), 0, Math.PI*2); ctx.fill();
+    // 체력바
+    const w = 28;
+    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(ex-w/2, ey-r-13, w, 5);
+    ctx.fillStyle='#57e0c9';
+    const pct = m.maxHp>0 ? Math.max(0,Math.min(1, m.hp/m.maxHp)) : 0;
+    ctx.fillRect(ex-w/2, ey-r-13, w*pct, 5);
+  }
+}
+// 융합체: 마허라 — 검은 구체 오라를 두른 거대 목각 마신
+function drawMahoraga(ex, ey, r, now, m){
+  ctx.save();
+  // 흡수되는 검은 구체 오라 (회전 궤도)
+  for(let i=0;i<8;i++){
+    const a = now*1.3 + i*Math.PI/4;
+    const rad = r*1.7 - (i%2)*r*0.25;
+    const ox = ex + Math.cos(a)*rad, oy = ey + Math.sin(a)*rad*0.75;
+    const orb = ctx.createRadialGradient(ox, oy, 0, ox, oy, r*0.34);
+    orb.addColorStop(0, 'rgba(60,20,90,.95)');
+    orb.addColorStop(0.6, 'rgba(20,8,34,.85)');
+    orb.addColorStop(1, 'rgba(20,8,34,0)');
+    ctx.fillStyle = orb;
+    ctx.beginPath(); ctx.arc(ox, oy, r*0.34, 0, Math.PI*2); ctx.fill();
+  }
+  // 어두운 위압 오라
+  const aura = ctx.createRadialGradient(ex, ey, r*0.4, ex, ey, r*2.1);
+  aura.addColorStop(0, 'rgba(120,40,180,.4)');
+  aura.addColorStop(1, 'rgba(30,10,50,0)');
+  ctx.fillStyle = aura;
+  ctx.beginPath(); ctx.arc(ex, ey, r*2.1, 0, Math.PI*2); ctx.fill();
+  // 바닥 그림자
+  ctx.fillStyle='rgba(0,0,0,.4)';
+  ctx.beginPath(); ctx.ellipse(ex, ey+r*1.05, r*1.1, r*0.4, 0, 0, Math.PI*2); ctx.fill();
+
+  // ---- 목각 몸체 (다크 우드) ----
+  const wood = ctx.createLinearGradient(ex, ey-r, ex, ey+r);
+  wood.addColorStop(0, '#4a3a2a');
+  wood.addColorStop(0.5, '#2e2118');
+  wood.addColorStop(1, '#15100b');
+  ctx.fillStyle = wood;
+  ctx.beginPath(); ctx.arc(ex, ey, r, 0, Math.PI*2); ctx.fill();
+  // 목각 균열 (금빛 이음선)
+  ctx.strokeStyle='rgba(200,150,70,.55)'; ctx.lineWidth=Math.max(1.2,r*0.05);
+  ctx.beginPath();
+  ctx.moveTo(ex-r*0.6, ey-r*0.2); ctx.lineTo(ex-r*0.1, ey+r*0.1); ctx.lineTo(ex+r*0.5, ey-r*0.3);
+  ctx.moveTo(ex-r*0.2, ey+r*0.6); ctx.lineTo(ex+r*0.05, ey+r*0.05); ctx.lineTo(ex+r*0.4, ey+r*0.5);
+  ctx.stroke();
+  // 이마 문양 (역삼각 룬)
+  ctx.strokeStyle='rgba(230,180,90,.8)'; ctx.lineWidth=Math.max(1,r*0.045);
+  ctx.beginPath();
+  ctx.moveTo(ex-r*0.28, ey-r*0.34); ctx.lineTo(ex+r*0.28, ey-r*0.34); ctx.lineTo(ex, ey-r*0.02); ctx.closePath();
+  ctx.stroke();
+
+  // ---- 거대한 뿔 (마허라 상징: 위로 뻗은 한 쌍 + 중앙 뿔) ----
+  ctx.fillStyle = '#e8ddc8';
+  const horn = (bx, by, tx, ty, wdt)=>{
+    const nx = -(ty-by), ny = (tx-bx); const l = Math.hypot(nx,ny)||1;
+    const ux=nx/l*wdt, uy=ny/l*wdt;
+    ctx.beginPath();
+    ctx.moveTo(bx-ux, by-uy); ctx.lineTo(bx+ux, by+uy);
+    ctx.quadraticCurveTo((bx+tx)/2+ux*0.4, (by+ty)/2, tx, ty);
+    ctx.closePath(); ctx.fill();
+  };
+  // 좌우 곡선 뿔
+  horn(ex-r*0.5, ey-r*0.55, ex-r*1.15, ey-r*1.35, r*0.16);
+  horn(ex+r*0.5, ey-r*0.55, ex+r*1.15, ey-r*1.35, r*0.16);
+  // 중앙 뿔
+  horn(ex, ey-r*0.7, ex, ey-r*1.55, r*0.18);
+  // 뿔 음영
+  ctx.fillStyle='rgba(0,0,0,.18)';
+  horn(ex-r*0.5, ey-r*0.55, ex-r*1.05, ey-r*1.28, r*0.07);
+  horn(ex+r*0.5, ey-r*0.55, ex+r*1.05, ey-r*1.28, r*0.07);
+
+  // ---- 붉게 타오르는 눈 (전방=좌측) ----
+  const eyeGlow = 0.6 + Math.sin(now*5)*0.3;
+  ctx.shadowColor='rgba(255,40,40,'+eyeGlow.toFixed(2)+')'; ctx.shadowBlur=r*0.5;
+  ctx.fillStyle='#ff2a1e';
+  ctx.beginPath(); ctx.ellipse(ex-r*0.42, ey+r*0.06, r*0.15, r*0.09, -0.3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(ex-r*0.02, ey+r*0.06, r*0.15, r*0.09, 0.3, 0, Math.PI*2); ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#ffd0c0';
+  ctx.beginPath(); ctx.arc(ex-r*0.42, ey+r*0.04, r*0.045, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(ex-r*0.02, ey+r*0.04, r*0.045, 0, Math.PI*2); ctx.fill();
+  // 이빨 (아래턱)
+  ctx.strokeStyle='rgba(230,220,200,.7)'; ctx.lineWidth=Math.max(1,r*0.04);
+  ctx.beginPath();
+  for(let i=-2;i<=2;i++){ const gx=ex+i*r*0.14; ctx.moveTo(gx, ey+r*0.42); ctx.lineTo(gx, ey+r*0.56); }
+  ctx.stroke();
+  ctx.restore();
+
+  // 체력바 (융합체 크게)
+  const w = Math.max(52, r*2);
+  ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(ex-w/2, ey-r-18, w, 6);
+  ctx.fillStyle='#b06cff';
+  const pct = m.maxHp>0 ? Math.max(0,Math.min(1, m.hp/m.maxHp)) : 0;
+  ctx.fillRect(ex-w/2, ey-r-18, w*pct, 6);
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1;
+  ctx.strokeRect(ex-w/2, ey-r-18, w, 6);
+  // 이름표
+  ctx.fillStyle='#e8c8ff'; ctx.font='900 '+Math.round(r*0.42)+'px "Black Han Sans",sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText('마허라', ex, ey-r-20);
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+}
 function drawProjectiles(){
   for(const p of getRenderProjectiles()){
     if(p.type==='wave'){
@@ -2150,7 +2340,7 @@ function drawProjectiles(){
       ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2); ctx.stroke();
       continue;
     }
-    ctx.fillStyle = p.type==='shard' ? COL_TEAL : p.type==='bolt' ? '#c98bee' : p.type==='ball' ? '#caa27a' : p.type==='star' ? '#ff5db0' : p.type==='fire' ? '#ff9040' : p.type==='rock' ? '#9aa3b2' : '#dfe6c9';
+    ctx.fillStyle = p.type==='shard' ? COL_TEAL : p.type==='bolt' ? '#c98bee' : p.type==='ball' ? '#caa27a' : p.type==='star' ? '#ff5db0' : p.type==='fire' ? '#ff9040' : '#dfe6c9';
     ctx.beginPath(); ctx.arc(p.x, p.y, p.type==='ball'?6:4, 0, Math.PI*2); ctx.fill();
   }
 }
@@ -2209,8 +2399,11 @@ function handleTap(cx,cy,isDouble){
   closeInfoPopup();
   // 2) 타워 선택 안 된 상태에서 빈 곳 탭 → 프리뷰/범위 해제
   if(!selectedTowerType){ placePreview=null; rangeShow=null; toast('먼저 아래에서 타워를 선택하세요'); return; }
-  // 3) 설치 불가 위치 검증
-  if(!isBuildableSpot(wx,wy)){ placePreview=null; rangeShow=null; toast('길 위나 기지 주변에는 설치할 수 없어요'); return; }
+  // 3) 설치 불가 위치 검증 (요새탑은 길 위에만, 나머지는 길 밖에만)
+  const isWall = !!TOWER_TYPES[selectedTowerType].wall;
+  if(isWall){
+    if(!isWallSpot(wx,wy)){ placePreview=null; rangeShow=null; toast('요새탑은 길 위에만 설치할 수 있어요'); return; }
+  } else if(!isBuildableSpot(wx,wy)){ placePreview=null; rangeShow=null; toast('길 위나 기지 주변에는 설치할 수 없어요'); return; }
   const tooClose = getRenderTowers().some(t=>{ const dx=t.x-wx, dy=t.y-wy; return dx*dx+dy*dy < MIN_TOWER_GAP*MIN_TOWER_GAP; });
   if(tooClose){ placePreview=null; rangeShow=null; toast('다른 타워와 너무 가까워요'); return; }
 
@@ -2234,8 +2427,7 @@ function handleTap(cx,cy,isDouble){
 
 /* ---------------- 화면 전환 ---------------- */
 function hostStartGame(){
-  const players = ['host'].concat(Object.keys(peers));   // 현재 접속 인원 고정
-  sim = newSim(players);
+  sim = newSim();
   gameOverShown = false;
   selectedTowerType = null; ghosts = {}; placePreview=null; rangeShow=null; closeInfoPopup();
   gameSpeed = 1; updateSpeedBtn();
@@ -2247,10 +2439,10 @@ function hostStartGame(){
   resizeCanvas();
   refreshTowerBarSel();
   if(soundReady) Snd.startBgm();
-  if(hasPeers() && act.start) act.start[0]({});
+  if(peerId && act.start) act.start[0]({});
 }
 function onNetStart(_data){
-  guestState = null; guestEnemies = {}; guestTowers = []; guestProjectiles = []; guestFireTrails = [];
+  guestState = null; guestEnemies = {}; guestTowers = []; guestProjectiles = []; guestFireTrails = []; guestMinions = {};
   gameOverShown = false;
   selectedTowerType = null; ghosts = {}; placePreview=null; rangeShow=null; closeInfoPopup();
   gameSpeed = 1; updateSpeedBtn();
@@ -2354,15 +2546,7 @@ function updateHud(){
     prepTimeTxt.textContent = Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
     const ready = iAmReady();
     readyBtn.classList.toggle('done', !!ready);
-    if(ready){
-      // 준비 완료 후: 남은 인원 표시
-      let total=0, done=0;
-      if(isHost && sim){ total=sim.players.length; done=sim.players.filter(p=>sim.ready[p]).length; }
-      else if(guestState){ total=(guestState.players||[]).length; done=(guestState.players||[]).filter(p=>guestState.readyMap[p]).length; }
-      readyBtn.textContent = (total>1) ? ('대기중 '+done+'/'+total) : '시작 중...';
-    } else {
-      readyBtn.textContent = '준비 완료';
-    }
+    readyBtn.textContent = ready ? (peerId ? '상대 대기중' : '시작 중...') : '준비 완료';
   } else {
     prepBar.classList.add('hidden');
     if(loadoutEditOpen){ loadoutEditOpen=false; loadoutDrawer.classList.add('hidden'); }
@@ -2417,12 +2601,12 @@ function loop(now){
       const steps = gameSpeed;                 // 1/2/3 배: 동일 dt로 여러 번 틱 → 물리 안정
       for(let s=0; s<steps && !sim.gameOver; s++) hostTick(dt);
       syncAccum += dt*steps;
-      if(hasPeers() && syncAccum>=SYNC_INTERVAL){
+      if(peerId && syncAccum>=SYNC_INTERVAL){
         syncAccum = 0;
         if(act.sync) act.sync[0](buildSnapshot());
         sim.pendingEvents = [];
         sim.sfxFire = {}; sim.sfxKill = 0; sim.sfxBaseHit = 0;
-      } else if(!hasPeers()){
+      } else if(!peerId){
         sim.pendingEvents = [];
         sim.sfxFire = {}; sim.sfxKill = 0; sim.sfxBaseHit = 0;
       }
